@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#061a30">
+<meta name="description" content="Mobile-first metric floor-plan editor with precise walls, rooms, openings, and vector export.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Blueprint Studio">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="icon" href="./icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <title>NetworK1NG Blueprint Studio</title>
 <style>
 :root{
@@ -14,6 +23,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%;margin:0;overflow:hidden;background:var(--bg)}
 body{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--white);-webkit-font-smoothing:antialiased;overscroll-behavior:none}
 button,input,select{font:inherit}
@@ -21,7 +31,7 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
-.app{height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
+.app{height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
 .topbar{position:relative;z-index:40;flex:0 0 auto;height:calc(58px + var(--safeTop));padding:var(--safeTop) 12px 0;display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,rgba(7,28,52,.98),rgba(4,19,37,.95));border-bottom:1px solid var(--line);box-shadow:0 8px 30px rgba(0,0,0,.22)}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand-mark{width:36px;height:36px;flex:0 0 36px;border-radius:11px;display:grid;place-items:center;position:relative;background:linear-gradient(145deg,rgba(103,232,255,.28),rgba(103,232,255,.04)),#08253f;border:1px solid rgba(103,232,255,.5);color:var(--cyan);font-size:13px;font-weight:800;letter-spacing:-.06em;box-shadow:inset 0 0 18px rgba(103,232,255,.09),0 0 18px rgba(24,153,194,.12)}
@@ -41,6 +51,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .export-btn svg{width:16px;height:16px}
 .workspace{position:relative;flex:1 1 auto;min-height:0;display:flex}
 .canvas-wrap{position:relative;flex:1 1 auto;min-width:0;min-height:0;overflow:hidden;background:radial-gradient(120% 100% at 20% 0%,rgba(27,107,159,.2),transparent 52%),radial-gradient(90% 80% at 95% 100%,rgba(9,78,129,.22),transparent 55%),linear-gradient(145deg,#061b33,#04152a 55%,#05182e);box-shadow:inset 0 0 90px rgba(0,8,18,.22);isolation:isolate}
+.empty-state{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:none;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .2s,transform .2s,visibility .2s}
+.empty-state.show{opacity:1;visibility:visible;transform:none}
+.empty-card{pointer-events:auto;width:min(302px,100%);padding:18px 17px 16px;border:1px solid rgba(103,232,255,.24);border-radius:18px;background:linear-gradient(165deg,rgba(9,39,68,.96),rgba(4,21,40,.97));box-shadow:0 22px 60px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.04);text-align:center}
+.empty-card .brand-mark{margin:0 auto 10px;width:40px;height:40px;flex-basis:40px;font-size:14px}
+.empty-card h2{margin:0;font-size:16px;font-weight:750;letter-spacing:-.01em}
+.empty-card p{margin:5px auto 13px;max-width:245px;color:var(--muted);font-size:10.5px;line-height:1.55}
+.empty-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.empty-actions .btn{height:40px;font-size:10px;padding:0 8px}
+.empty-actions .btn:last-child{grid-column:1/-1}
 #board{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none;cursor:crosshair;z-index:1}
 #board.tool-select{cursor:default}#board.tool-hand{cursor:grab}#board.panning{cursor:grabbing}
 .canvas-controls{position:absolute;z-index:8;left:10px;top:10px;display:flex;align-items:center;gap:4px;padding:4px;border-radius:14px;border:1px solid var(--line);background:rgba(5,24,45,.94);box-shadow:0 10px 30px rgba(0,0,0,.22)}
@@ -89,6 +108,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .btn.danger{color:var(--danger);border-color:rgba(255,112,130,.19);background:rgba(255,112,130,.045)}
 .btn.danger:hover{background:rgba(255,112,130,.1);border-color:rgba(255,112,130,.34)}
 .btn.primary{color:#032135;background:linear-gradient(180deg,#91efff,#4ed7f2);border-color:rgba(167,246,255,.55);font-weight:800}
+.install-btn{width:100%;margin-top:8px;background:rgba(103,232,255,.07);border-color:rgba(103,232,255,.24)}
 .note{font-size:9px;line-height:1.55;color:var(--muted);padding:9px 10px;border-radius:10px;border:1px dashed rgba(103,232,255,.14);background:rgba(103,232,255,.025);margin-top:10px}
 .note b{color:var(--cyan);font-weight:650}
 .project-hero{padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,rgba(103,232,255,.08),rgba(103,232,255,.015));position:relative;overflow:hidden}
@@ -173,26 +193,28 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .preview-dot{fill:#c8f9ff;pointer-events:none}
 @keyframes sheetUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @media(max-width:900px){
-  .inspector{position:absolute;left:8px;right:8px;bottom:8px;width:auto;flex-basis:auto;max-height:44dvh;border:1px solid rgba(103,232,255,.25);border-radius:18px;display:none;z-index:30;padding:12px 13px;box-shadow:0 24px 70px rgba(0,0,0,.58);background:linear-gradient(170deg,rgba(9,39,68,.97),rgba(4,21,40,.985))}
+  .inspector{position:absolute;left:8px;right:8px;bottom:8px;width:auto;flex-basis:auto;max-height:58dvh;border:1px solid rgba(103,232,255,.25);border-radius:18px;display:none;z-index:30;padding:12px 13px;box-shadow:0 24px 70px rgba(0,0,0,.58);background:linear-gradient(170deg,rgba(9,39,68,.97),rgba(4,21,40,.985));-webkit-overflow-scrolling:touch}
   .inspector.open{display:block;animation:sheetUp .2s}
   .inspector .desktop-only{display:none}
   .canvas-hint{bottom:11px;max-width:calc(100% - 190px);left:52%}
 }
 @media(max-width:620px){
-  .topbar{height:calc(54px + var(--safeTop));gap:7px;padding-left:9px;padding-right:7px}
+  .topbar{height:calc(56px + var(--safeTop));gap:7px;padding-left:max(9px,env(safe-area-inset-left));padding-right:max(7px,env(safe-area-inset-right))}
   .brand-mark{width:32px;height:32px;flex-basis:32px;border-radius:9px;font-size:11.5px}
   .brand-title{font-size:10.5px;letter-spacing:.07em}.brand-sub{font-size:6.5px;letter-spacing:.12em}
   .area-chip{padding:5px 8px;gap:5px;border-radius:10px}.area-chip .label{display:none}.area-chip strong{font-size:12px}.area-chip small{font-size:7.5px}
-  .icon-btn{height:34px;min-width:34px;border-radius:9px}.icon-btn svg{width:17px;height:17px}
-  .export-btn{width:34px;min-width:34px;padding:0;border-radius:9px}.export-btn span{display:none}
-  .canvas-controls{left:8px;top:8px;padding:3px;gap:1px;border-radius:12px}.canvas-btn{width:34px;height:34px;border-radius:9px}.canvas-sep{margin:0 1px;height:18px}
+  .icon-btn{height:36px;min-width:36px;border-radius:9px}.icon-btn svg{width:17px;height:17px}
+  .export-btn{width:36px;min-width:36px;padding:0;border-radius:9px}.export-btn span{display:none}
+  .canvas-controls{left:8px;top:8px;padding:3px;gap:1px;border-radius:12px}.canvas-btn{width:36px;height:36px;border-radius:9px}.canvas-sep{margin:0 1px;height:18px}
   .canvas-hint{bottom:10px;left:50%;max-width:calc(100% - 156px);font-size:8px;padding:5px 9px;white-space:nowrap}
   .scale-readout{left:10px;bottom:10px;font-size:7.5px;gap:5px}.canvas-watermark{right:10px;bottom:9px}.canvas-watermark b{font-size:6.5px}.canvas-watermark span{display:none}
-  .toolbar{height:calc(62px + var(--safe));padding:4px 4px var(--safe);gap:0}.tool{border-radius:10px;gap:3px}.tool svg{width:19px;height:19px}.tool span{font-size:7px;letter-spacing:.02em}
-  .inspector{max-height:46dvh;left:6px;right:6px;bottom:6px}.insp-title{font-size:14px}.field input,.field select{height:40px;font-size:11px}.btn{height:38px}
-  .modal{padding:12px}.modal-card{padding:15px;border-radius:16px}
+  .toolbar{height:calc(64px + var(--safe));padding:4px max(4px,env(safe-area-inset-right)) var(--safe) max(4px,env(safe-area-inset-left));gap:0}.tool{border-radius:10px;gap:3px}.tool svg{width:20px;height:20px}.tool span{font-size:7px;letter-spacing:.02em}
+  .inspector{max-height:60dvh;left:6px;right:6px;bottom:6px;padding:12px 12px 14px}.insp-title{font-size:14px}.field input,.field select{height:44px;font-size:16px}.btn{height:42px}
+  .modal{padding:12px}.modal-card{padding:15px;border-radius:16px;max-height:92dvh}.modal-close{width:38px;height:38px}.empty-card{padding:16px 14px 14px}.empty-actions .btn{height:42px}
+  .empty-state{padding:14px}
 }
 @media(max-width:390px){.brand-title{font-size:9.5px}.brand-sub{display:none}.area-chip strong{font-size:11px}.scale-readout span{display:none}}
+@media(max-width:370px){.topbar{gap:4px}.brand{gap:7px}.brand-mark{width:30px;height:30px;flex-basis:30px}.brand-title{font-size:9px;letter-spacing:.03em}.area-chip{padding:4px 6px;gap:3px}.area-chip strong{font-size:10.5px}.top-actions{gap:2px}.icon-btn{width:32px;min-width:32px;height:32px}.export-btn{width:32px;min-width:32px;height:32px;margin-left:1px}}
 @media(min-width:901px){.canvas-hint{left:auto;right:14px;transform:none;bottom:12px}.canvas-watermark{right:auto;left:14px;align-items:flex-start;bottom:34px}.scale-readout{bottom:13px;left:14px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 </style>
@@ -215,6 +237,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
 <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
 <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3v12M7.5 10.5L12 15l4.5-4.5M5 17v3h14v-3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-install" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 6.5v7M9.5 11L12 13.5 14.5 11M10 18.5h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
 <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
@@ -249,6 +272,18 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <button class="canvas-btn" id="zoomInBtn" aria-label="Zoom in"><svg><use href="#i-plus"/></svg></button>
         <button class="canvas-btn" id="fitBtn" aria-label="Fit plan"><svg><use href="#i-fit"/></svg></button>
       </div>
+      <div class="empty-state" id="emptyState" aria-hidden="true">
+        <div class="empty-card">
+          <div class="brand-mark" aria-hidden="true">N1</div>
+          <h2>Start your floor plan</h2>
+          <p>Draw a wall or a room, or load the demo to explore. Snapping keeps corners tidy.</p>
+          <div class="empty-actions">
+            <button class="btn primary" data-empty-tool="wall">Draw wall</button>
+            <button class="btn" data-empty-tool="room">Add room</button>
+            <button class="btn" data-empty-tool="demo"><svg><use href="#i-spark"/></svg>Load demo</button>
+          </div>
+        </div>
+      </div>
       <div class="scale-readout"><span>SCALE</span><div class="scale-bar" id="scaleBar"></div><span id="scaleLabel">1 m</span></div>
       <div class="canvas-hint" id="canvasHint">Tap an element to edit · pinch to zoom</div>
       <div class="canvas-watermark"><b>MADE BY NETWORK1NG</b><span>BLUEPRINT STUDIO / N1</span></div>
@@ -279,7 +314,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <button class="export-option" id="exportPng"><svg><use href="#i-image"/></svg><b>PNG image</b><span>High-resolution raster with title block &amp; watermark.</span></button>
       <button class="export-option" id="exportSvg"><svg><use href="#i-vector"/></svg><b>SVG vector</b><span>Scalable blueprint view for print or editing.</span></button>
     </div>
-    <div class="modal-actions"><div class="row"><button class="btn grow" id="loadDemoBtn"><svg><use href="#i-spark"/></svg>Load demo</button><button class="btn grow danger" id="newPlanBtn"><svg><use href="#i-refresh"/></svg>New plan</button></div></div>
+    <div class="modal-actions"><div class="row"><button class="btn grow" id="loadDemoBtn"><svg><use href="#i-spark"/></svg>Load demo</button><button class="btn grow danger" id="newPlanBtn"><svg><use href="#i-refresh"/></svg>New plan</button></div><button class="btn install-btn" id="installBtn" hidden><svg><use href="#i-install"/></svg><span id="installBtnLabel">Install app</span></button></div>
     <div class="brand-footer">Crafted for precise spaces · <b>Made by NetworK1NG</b></div>
   </div>
 </div>
@@ -308,6 +343,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   const overlayLayer = $('#overlayLayer'), selectionLayer = $('#selectionLayer');
   const inspector = $('#inspector'), canvasWrap = $('#canvasWrap');
   const modal = $('#projectModal'), toastEl = $('#toast');
+  const emptyState = $('#emptyState'), installBtn = $('#installBtn');
   const COLORS = {
     canvas:'#061a30', wall:'#e6fbff', cyan:'#67e8ff', object:'#7ee8f8',
     rooms:['#58d9ee','#7ce0c5','#88c8ff','#6edce3','#9ad9bf','#7ad6ff']
@@ -678,6 +714,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (sel) selectionLayer.appendChild(buildSelection(sel, s));
     updateMetrics();
     syncInspectorValues();
+    syncEmptyState();
   }
 
   /* snapping */
@@ -1495,6 +1532,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     hand:'Drag to pan · pinch to zoom'
   };
   function updateToolHint(){ $('#canvasHint').textContent = HINTS[state.tool] || HINTS.select; }
+  function syncEmptyState(){
+    const show = !state.items.length && !state.preview && state.tool === 'select' && !state.interaction;
+    emptyState.classList.toggle('show', show);
+    emptyState.setAttribute('aria-hidden', show ? 'false' : 'true');
+  }
   function setTool(tool){
     state.tool = tool === 'pan' ? 'hand' : tool;
     state.preview = null; state.activeSnap = null;
@@ -1502,6 +1544,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     syncToolButtons(); updateToolHint(); render();
   }
   $$('.tool').forEach(btn => btn.addEventListener('click', () => setTool(btn.getAttribute('data-tool'))));
+  $$('[data-empty-tool]').forEach(btn => btn.addEventListener('click', () => {
+    const action = btn.getAttribute('data-empty-tool');
+    if (action === 'demo') loadDemo(); else setTool(action);
+  }));
+  inspector.addEventListener('focusin', e => {
+    if (!e.target.matches('input, select') || !window.matchMedia('(max-width: 900px)').matches) return;
+    setTimeout(() => {
+      if (e.target.isConnected) e.target.scrollIntoView({ block:'nearest', behavior:'smooth' });
+    }, 220);
+  });
   $('#gridBtn').addEventListener('click', () => { state.showGrid = !state.showGrid; $('#gridBtn').classList.toggle('active', state.showGrid); render(); });
   $('#dimsBtn').addEventListener('click', () => { state.showDims = !state.showDims; $('#dimsBtn').classList.toggle('active', state.showDims); render(); });
   $('#snapBtn').addEventListener('click', () => { state.snap = !state.snap; $('#snapBtn').classList.toggle('active', state.snap); toast(state.snap ? 'Smart snapping on' : 'Snapping off'); });
@@ -1669,6 +1721,28 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   $('#exportSvg').addEventListener('click', exportSvg);
   $('#loadDemoBtn').addEventListener('click', loadDemo);
   $('#newPlanBtn').addEventListener('click', newPlan);
+
+  /* PWA install */
+  let deferredInstall = null;
+  const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  function syncInstallButton(){ if (installBtn) installBtn.hidden = isStandalone(); }
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; syncInstallButton(); });
+  window.addEventListener('appinstalled', () => { deferredInstall = null; syncInstallButton(); toast('Blueprint Studio installed'); });
+  if (installBtn) installBtn.addEventListener('click', async () => {
+    if (!deferredInstall) { toast('Open your browser menu and choose “Add to Home Screen”'); return; }
+    const prompt = deferredInstall;
+    deferredInstall = null;
+    try {
+      prompt.prompt();
+      const choice = await prompt.userChoice;
+      if (choice.outcome === 'accepted') installBtn.hidden = true;
+    } catch (_) {}
+  });
+  syncInstallButton();
+  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if (modal.classList.contains('open')) { closeProjectModal(); return; }
