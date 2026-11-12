@@ -40,17 +40,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .export-btn{display:flex;gap:7px;padding:0 12px;color:#032135;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:linear-gradient(180deg,#8cefff,#4bd6f2);border-color:rgba(167,246,255,.65);box-shadow:0 4px 18px rgba(66,209,239,.19);margin-left:3px}
 .export-btn svg{width:16px;height:16px}
 .workspace{position:relative;flex:1 1 auto;min-height:0;display:flex}
-.canvas-wrap{position:relative;flex:1 1 auto;min-width:0;min-height:0;overflow:hidden;background:radial-gradient(120% 100% at 20% 0%,rgba(27,107,159,.2),transparent 52%),radial-gradient(90% 80% at 95% 100%,rgba(9,78,129,.22),transparent 55%),linear-gradient(145deg,#061b33,#04152a 55%,#05182e)}
-.canvas-wrap::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:radial-gradient(120% 80% at 50% 50%,transparent 58%,rgba(0,8,18,.22));}
+.canvas-wrap{position:relative;flex:1 1 auto;min-width:0;min-height:0;overflow:hidden;background:radial-gradient(120% 100% at 20% 0%,rgba(27,107,159,.2),transparent 52%),radial-gradient(90% 80% at 95% 100%,rgba(9,78,129,.22),transparent 55%),linear-gradient(145deg,#061b33,#04152a 55%,#05182e);box-shadow:inset 0 0 90px rgba(0,8,18,.22);isolation:isolate}
 #board{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none;cursor:crosshair;z-index:1}
 #board.tool-select{cursor:default}#board.tool-hand{cursor:grab}#board.panning{cursor:grabbing}
-.canvas-controls{position:absolute;z-index:8;left:10px;top:10px;display:flex;align-items:center;gap:4px;padding:4px;border-radius:14px;border:1px solid var(--line);background:rgba(5,24,45,.76);backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px);box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.canvas-controls{position:absolute;z-index:8;left:10px;top:10px;display:flex;align-items:center;gap:4px;padding:4px;border-radius:14px;border:1px solid var(--line);background:rgba(5,24,45,.94);box-shadow:0 10px 30px rgba(0,0,0,.22)}
 .canvas-btn{width:36px;height:36px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);display:grid;place-items:center;transition:.15s}
 .canvas-btn:hover{color:var(--cyan);background:rgba(103,232,255,.07)}
 .canvas-btn.active{color:var(--cyan);background:rgba(103,232,255,.11);border-color:rgba(103,232,255,.18)}
 .canvas-btn svg{width:17px;height:17px}
 .canvas-sep{width:1px;height:21px;background:var(--line);margin:0 2px}
-.canvas-hint{position:absolute;z-index:7;left:50%;bottom:13px;transform:translateX(-50%);padding:7px 12px;border-radius:999px;border:1px solid rgba(103,232,255,.14);background:rgba(5,24,45,.7);backdrop-filter:blur(10px);color:var(--muted);font-size:9.5px;white-space:nowrap;pointer-events:none;max-width:calc(100% - 36px);overflow:hidden;text-overflow:ellipsis}
+.canvas-hint{position:absolute;z-index:7;left:50%;bottom:13px;transform:translateX(-50%);padding:7px 12px;border-radius:999px;border:1px solid rgba(103,232,255,.14);background:rgba(5,24,45,.9);color:var(--muted);font-size:9.5px;white-space:nowrap;pointer-events:none;max-width:calc(100% - 36px);overflow:hidden;text-overflow:ellipsis}
 .canvas-hint strong{color:var(--cyan);font-weight:600}
 .scale-readout{position:absolute;z-index:7;left:12px;bottom:13px;display:flex;align-items:center;gap:7px;color:var(--muted);font-size:8.5px;letter-spacing:.06em;pointer-events:none}
 .scale-bar{height:5px;border-left:1px solid rgba(140,238,255,.65);border-right:1px solid rgba(140,238,255,.65);position:relative;min-width:20px;transition:width .1s}
@@ -118,7 +117,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:18px}
 .modal.open{display:flex}
-.modal-backdrop{position:absolute;inset:0;background:rgba(1,8,17,.72);backdrop-filter:blur(5px)}
+.modal-backdrop{position:absolute;inset:0;background:rgba(1,8,17,.82)}
 .modal-card{position:relative;width:min(430px,100%);max-height:88dvh;overflow-y:auto;border-radius:20px;border:1px solid rgba(103,232,255,.26);background:linear-gradient(170deg,#0a2b4b,#05182e 72%);box-shadow:0 30px 100px rgba(0,0,0,.62);padding:18px;animation:modalIn .22s cubic-bezier(.2,.8,.2,1)}
 @keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 .modal-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:15px}
@@ -138,9 +137,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .modal-actions .row{display:flex;gap:8px}
 .brand-footer{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:16px;color:var(--muted2);font-size:8px;letter-spacing:.12em;text-transform:uppercase}
 .brand-footer b{color:var(--cyan);font-weight:650}
-.grid-minor{stroke:rgba(94,196,232,.075);stroke-width:1;fill:none;vector-effect:non-scaling-stroke}
-.grid-major{stroke:rgba(103,232,255,.15);stroke-width:1;fill:none;vector-effect:non-scaling-stroke}
-.grid-axis{stroke:rgba(103,232,255,.34);stroke-width:1.2;fill:none;vector-effect:non-scaling-stroke}
+.grid-minor{stroke:rgba(94,196,232,.075);stroke-width:1;fill:none;vector-effect:non-scaling-stroke;shape-rendering:crispEdges}
+.grid-major{stroke:rgba(103,232,255,.15);stroke-width:1;fill:none;vector-effect:non-scaling-stroke;shape-rendering:crispEdges}
+.grid-axis{stroke:rgba(103,232,255,.34);stroke-width:1.2;fill:none;vector-effect:non-scaling-stroke;shape-rendering:crispEdges}
 .grid-label{fill:rgba(130,202,226,.58);font-family:ui-monospace,monospace;dominant-baseline:middle;letter-spacing:.04em}
 .wall-glow{stroke:rgba(75,218,249,.13);fill:none;stroke-linecap:square}
 .wall-core{stroke:#e6fbff;fill:none;stroke-linecap:square}
