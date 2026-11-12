@@ -1,0 +1,1643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#061a30">
+<title>NetworK1NG Blueprint Studio</title>
+<style>
+:root{
+  --bg:#04152a;--bg2:#061d36;--canvas:#061a30;--panel:#071d35;
+  --line:rgba(120,225,255,.16);--line2:rgba(120,225,255,.32);
+  --cyan:#67e8ff;--cyan2:#24b8dd;--white:#e5faff;--muted:#6e9ab3;--muted2:#527b93;
+  --danger:#ff7082;--amber:#ffd27a;--safe:env(safe-area-inset-bottom,0px);--safeTop:env(safe-area-inset-top,0px);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg)}
+body{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--white);-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+button,input,select{font:inherit}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.app{height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
+.topbar{position:relative;z-index:40;flex:0 0 auto;height:calc(58px + var(--safeTop));padding:var(--safeTop) 12px 0;display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,rgba(7,28,52,.98),rgba(4,19,37,.95));border-bottom:1px solid var(--line);box-shadow:0 8px 30px rgba(0,0,0,.22)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{width:36px;height:36px;flex:0 0 36px;border-radius:11px;display:grid;place-items:center;position:relative;background:linear-gradient(145deg,rgba(103,232,255,.28),rgba(103,232,255,.04)),#08253f;border:1px solid rgba(103,232,255,.5);color:var(--cyan);font-size:13px;font-weight:800;letter-spacing:-.06em;box-shadow:inset 0 0 18px rgba(103,232,255,.09),0 0 18px rgba(24,153,194,.12)}
+.brand-mark::after{content:"";position:absolute;inset:4px;border:1px solid rgba(103,232,255,.18);border-radius:7px}
+.brand-title{font-size:13px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.brand-sub{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:2px;white-space:nowrap}
+.area-chip{margin-left:auto;display:flex;align-items:baseline;gap:8px;padding:6px 11px;border:1px solid var(--line);border-radius:12px;background:rgba(103,232,255,.045);white-space:nowrap}
+.area-chip .label{font-size:7.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.area-chip strong{font-size:14px;color:var(--white)}
+.area-chip small{font-size:9px;color:var(--cyan);font-weight:600}
+.top-actions{display:flex;align-items:center;gap:5px}
+.icon-btn,.export-btn{border:1px solid transparent;background:transparent;color:var(--muted);height:38px;min-width:38px;border-radius:11px;display:grid;place-items:center;transition:.16s}
+.icon-btn:hover,.export-btn:hover{color:var(--cyan);background:rgba(103,232,255,.07);border-color:var(--line)}
+.icon-btn[disabled]{opacity:.25;pointer-events:none}
+.icon-btn svg,.export-btn svg{width:19px;height:19px}
+.export-btn{display:flex;gap:7px;padding:0 12px;color:#032135;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:linear-gradient(180deg,#8cefff,#4bd6f2);border-color:rgba(167,246,255,.65);box-shadow:0 4px 18px rgba(66,209,239,.19);margin-left:3px}
+.export-btn svg{width:16px;height:16px}
+.workspace{position:relative;flex:1 1 auto;min-height:0;display:flex}
+.canvas-wrap{position:relative;flex:1 1 auto;min-width:0;min-height:0;overflow:hidden;background:radial-gradient(120% 100% at 20% 0%,rgba(27,107,159,.2),transparent 52%),radial-gradient(90% 80% at 95% 100%,rgba(9,78,129,.22),transparent 55%),linear-gradient(145deg,#061b33,#04152a 55%,#05182e)}
+.canvas-wrap::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:radial-gradient(120% 80% at 50% 50%,transparent 58%,rgba(0,8,18,.22));}
+#board{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none;cursor:crosshair;z-index:1}
+#board.tool-select{cursor:default}#board.tool-hand{cursor:grab}#board.panning{cursor:grabbing}
+.canvas-controls{position:absolute;z-index:8;left:10px;top:10px;display:flex;align-items:center;gap:4px;padding:4px;border-radius:14px;border:1px solid var(--line);background:rgba(5,24,45,.76);backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px);box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.canvas-btn{width:36px;height:36px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);display:grid;place-items:center;transition:.15s}
+.canvas-btn:hover{color:var(--cyan);background:rgba(103,232,255,.07)}
+.canvas-btn.active{color:var(--cyan);background:rgba(103,232,255,.11);border-color:rgba(103,232,255,.18)}
+.canvas-btn svg{width:17px;height:17px}
+.canvas-sep{width:1px;height:21px;background:var(--line);margin:0 2px}
+.canvas-hint{position:absolute;z-index:7;left:50%;bottom:13px;transform:translateX(-50%);padding:7px 12px;border-radius:999px;border:1px solid rgba(103,232,255,.14);background:rgba(5,24,45,.7);backdrop-filter:blur(10px);color:var(--muted);font-size:9.5px;white-space:nowrap;pointer-events:none;max-width:calc(100% - 36px);overflow:hidden;text-overflow:ellipsis}
+.canvas-hint strong{color:var(--cyan);font-weight:600}
+.scale-readout{position:absolute;z-index:7;left:12px;bottom:13px;display:flex;align-items:center;gap:7px;color:var(--muted);font-size:8.5px;letter-spacing:.06em;pointer-events:none}
+.scale-bar{height:5px;border-left:1px solid rgba(140,238,255,.65);border-right:1px solid rgba(140,238,255,.65);position:relative;min-width:20px;transition:width .1s}
+.scale-bar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(140,238,255,.65)}
+.canvas-watermark{position:absolute;z-index:7;right:13px;bottom:12px;pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;opacity:.68}
+.canvas-watermark b{font-size:8px;letter-spacing:.18em;color:rgba(154,224,244,.7);font-weight:700}
+.canvas-watermark span{font-family:ui-monospace,monospace;font-size:7px;letter-spacing:.12em;color:rgba(103,232,255,.42)}
+.inspector{position:relative;z-index:20;flex:0 0 318px;width:318px;min-height:0;overflow-y:auto;padding:14px;background:linear-gradient(180deg,rgba(8,34,61,.97),rgba(4,20,38,.98)),var(--panel);border-left:1px solid var(--line);scrollbar-width:thin;scrollbar-color:rgba(103,232,255,.18) transparent}
+.inspector::-webkit-scrollbar{width:5px}.inspector::-webkit-scrollbar-thumb{background:rgba(103,232,255,.18);border-radius:99px}
+.insp-head{display:flex;align-items:flex-start;gap:9px;margin-bottom:13px}
+.insp-kicker{font-size:8px;letter-spacing:.16em;color:var(--cyan);text-transform:uppercase;margin-bottom:3px}
+.insp-title{font-size:16px;font-weight:750;line-height:1.15;margin:0}
+.insp-sub{font-size:9px;color:var(--muted);margin-top:3px}
+.insp-close{margin-left:auto;width:32px;height:32px;flex:0 0 32px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--muted);display:grid;place-items:center}
+.insp-close:hover{color:var(--white);background:rgba(255,255,255,.05)}
+.insp-close svg{width:15px;height:15px}
+.section-label{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2);margin:17px 0 7px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}.field.full{grid-column:1/-1}
+.field label{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-left:2px}
+.input-wrap{position:relative}
+.input-wrap .unit{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:8px;color:var(--muted2);pointer-events:none}
+.field input,.field select{width:100%;height:42px;border-radius:10px;border:1px solid rgba(120,225,255,.15);background:rgba(3,16,31,.58);color:var(--white);padding:0 10px;font-size:12px;transition:.15s}
+.field input[type=number]{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.field input:hover,.field select:hover{border-color:rgba(120,225,255,.28)}
+.field input:focus,.field select:focus{border-color:rgba(103,232,255,.55);background:rgba(3,16,31,.78);outline:none}
+.field input.with-unit{padding-right:32px}
+.field select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 15px) 18px,calc(100% - 10px) 18px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.metric-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid rgba(103,232,255,.17);border-radius:12px;background:linear-gradient(135deg,rgba(103,232,255,.09),rgba(103,232,255,.02));margin-top:11px}
+.metric-card span{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.metric-card strong{font-size:17px;color:var(--cyan);font-family:ui-monospace,monospace}
+.metric-card strong small{font-size:9px;color:var(--white);opacity:.7}
+.insp-actions{display:flex;gap:7px;margin-top:13px}
+.btn{height:40px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.025);color:var(--white);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:10px;font-weight:650;transition:.15s}
+.btn:hover{background:rgba(103,232,255,.07);border-color:rgba(103,232,255,.3)}
+.btn svg{width:15px;height:15px}.btn.grow{flex:1}
+.btn.danger{color:var(--danger);border-color:rgba(255,112,130,.19);background:rgba(255,112,130,.045)}
+.btn.danger:hover{background:rgba(255,112,130,.1);border-color:rgba(255,112,130,.34)}
+.btn.primary{color:#032135;background:linear-gradient(180deg,#91efff,#4ed7f2);border-color:rgba(167,246,255,.55);font-weight:800}
+.note{font-size:9px;line-height:1.55;color:var(--muted);padding:9px 10px;border-radius:10px;border:1px dashed rgba(103,232,255,.14);background:rgba(103,232,255,.025);margin-top:10px}
+.note b{color:var(--cyan);font-weight:650}
+.project-hero{padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,rgba(103,232,255,.08),rgba(103,232,255,.015));position:relative;overflow:hidden}
+.project-hero::after{content:"N1";position:absolute;right:-8px;bottom:-25px;font-size:92px;font-weight:850;letter-spacing:-.1em;color:rgba(103,232,255,.045);pointer-events:none}
+.project-hero h3{margin:0;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.project-hero p{margin:6px 0 0;font-size:9.5px;line-height:1.55;color:var(--muted);max-width:190px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.stat{padding:9px 6px;border:1px solid var(--line);border-radius:10px;background:rgba(3,16,31,.32);text-align:center}
+.stat b{display:block;font-family:ui-monospace,monospace;font-size:15px;color:var(--cyan);font-weight:600}
+.stat span{display:block;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-top:2px}
+.insp-list{display:flex;flex-direction:column;gap:7px;margin-top:8px}
+.legend-item{display:flex;align-items:center;gap:9px;font-size:9.5px;color:var(--muted)}
+.swatch{width:18px;height:2px;border-radius:2px;background:var(--cyan);position:relative}
+.swatch.wall{height:4px;background:#e5faff}.swatch.room{height:12px;border-radius:3px;background:rgba(103,232,255,.13);border:1px solid rgba(103,232,255,.35)}
+.swatch.open{background:transparent;border-top:2px solid var(--cyan);height:0}
+.mini-help{font-size:9px;line-height:1.7;color:var(--muted);margin-top:7px}
+.mini-help kbd{font-family:ui-monospace,monospace;font-size:8px;padding:1px 4px;border:1px solid var(--line);border-radius:4px;color:var(--white);background:rgba(255,255,255,.03)}
+.toolbar{position:relative;z-index:45;flex:0 0 auto;height:calc(68px + var(--safe));padding:5px 7px var(--safe);display:flex;align-items:stretch;gap:2px;background:linear-gradient(180deg,rgba(5,23,43,.96),rgba(3,16,31,.99));border-top:1px solid var(--line2);box-shadow:0 -10px 35px rgba(0,0,0,.28)}
+.tool{flex:1 1 0;min-width:0;border:none;border-radius:12px;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;transition:.15s}
+.tool svg{width:21px;height:21px;transition:.15s}.tool span{font-size:8px;letter-spacing:.06em;text-transform:uppercase;font-weight:650}
+.tool:hover{color:var(--white);background:rgba(103,232,255,.045)}
+.tool.active{color:var(--cyan);background:linear-gradient(180deg,rgba(103,232,255,.14),rgba(103,232,255,.035))}
+.tool.active::before{content:"";position:absolute;top:-5px;left:28%;right:28%;height:2px;border-radius:0 0 3px 3px;background:var(--cyan);box-shadow:0 0 9px rgba(103,232,255,.65)}
+.tool.active svg{transform:translateY(-1px)}
+.toast{position:fixed;z-index:100;left:50%;bottom:calc(82px + var(--safe));transform:translate(-50%,12px);padding:9px 15px;border-radius:999px;border:1px solid rgba(103,232,255,.26);background:rgba(4,22,41,.97);color:var(--white);font-size:10.5px;box-shadow:0 12px 38px rgba(0,0,0,.42);opacity:0;pointer-events:none;transition:.2s;max-width:calc(100vw - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.open{display:flex}
+.modal-backdrop{position:absolute;inset:0;background:rgba(1,8,17,.72);backdrop-filter:blur(5px)}
+.modal-card{position:relative;width:min(430px,100%);max-height:88dvh;overflow-y:auto;border-radius:20px;border:1px solid rgba(103,232,255,.26);background:linear-gradient(170deg,#0a2b4b,#05182e 72%);box-shadow:0 30px 100px rgba(0,0,0,.62);padding:18px;animation:modalIn .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:15px}
+.modal-head .brand-mark{width:42px;height:42px;flex-basis:42px;font-size:15px}
+.modal-title{font-size:16px;font-weight:750;margin:0}.modal-sub{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.04em}
+.modal-close{margin-left:auto;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);display:grid;place-items:center}
+.modal-close:hover{color:var(--white);background:rgba(255,255,255,.04)}.modal-close svg{width:16px;height:16px}
+.modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.modal-stat{border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center;background:rgba(3,16,31,.28)}
+.modal-stat b{display:block;color:var(--cyan);font-family:ui-monospace,monospace;font-size:14px}
+.modal-stat span{display:block;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-top:2px}
+.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.export-option{border:1px solid var(--line);border-radius:13px;padding:13px 12px;background:rgba(3,16,31,.35);color:var(--white);text-align:left;transition:.15s;display:flex;flex-direction:column;gap:7px}
+.export-option:hover{border-color:rgba(103,232,255,.42);background:rgba(103,232,255,.07);transform:translateY(-1px)}
+.export-option svg{width:22px;height:22px;color:var(--cyan)}.export-option b{font-size:11px}.export-option span{font-size:8.5px;color:var(--muted);line-height:1.4}
+.modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:15px;padding-top:13px;border-top:1px solid var(--line)}
+.modal-actions .row{display:flex;gap:8px}
+.brand-footer{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:16px;color:var(--muted2);font-size:8px;letter-spacing:.12em;text-transform:uppercase}
+.brand-footer b{color:var(--cyan);font-weight:650}
+.grid-minor{stroke:rgba(94,196,232,.075);stroke-width:1;fill:none;vector-effect:non-scaling-stroke}
+.grid-major{stroke:rgba(103,232,255,.15);stroke-width:1;fill:none;vector-effect:non-scaling-stroke}
+.grid-axis{stroke:rgba(103,232,255,.34);stroke-width:1.2;fill:none;vector-effect:non-scaling-stroke}
+.grid-label{fill:rgba(130,202,226,.58);font-family:ui-monospace,monospace;dominant-baseline:middle;letter-spacing:.04em}
+.wall-glow{stroke:rgba(75,218,249,.13);fill:none;stroke-linecap:square}
+.wall-core{stroke:#e6fbff;fill:none;stroke-linecap:square}
+.wall-selected-glow{stroke:rgba(103,232,255,.42);fill:none;stroke-linecap:square}
+.wall-hit{stroke:transparent;fill:none;pointer-events:stroke;cursor:pointer}
+.room-floor{pointer-events:all;cursor:move}
+.room-stroke{fill:none;stroke-width:1.2;vector-effect:non-scaling-stroke;opacity:.52;pointer-events:none}
+.room-label{fill:#dcf9ff;font-family:ui-sans-serif,sans-serif;font-weight:750;text-anchor:middle;dominant-baseline:middle;pointer-events:none;letter-spacing:.09em}
+.room-area{fill:#66dff8;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+.object-fill{pointer-events:all;cursor:move}
+.object-stroke{fill:none;stroke:#75e0f5;stroke-width:1.4;vector-effect:non-scaling-stroke;opacity:.75;pointer-events:none}
+.object-label{fill:#a8eafa;font-family:ui-sans-serif,sans-serif;font-weight:650;text-anchor:middle;dominant-baseline:middle;pointer-events:none;letter-spacing:.08em}
+.open-gap{stroke:#061a30;fill:none;stroke-linecap:butt}
+.open-ink{stroke:#7eeaff;fill:none;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.open-arc{stroke:rgba(126,234,255,.64);fill:none;stroke-width:1.15;vector-effect:non-scaling-stroke;stroke-dasharray:3 3;pointer-events:none}
+.open-hit{stroke:transparent;fill:none;pointer-events:stroke;cursor:pointer}
+.measure-pill{fill:rgba(3,17,32,.88);stroke:rgba(103,232,255,.24);stroke-width:1;vector-effect:non-scaling-stroke}
+.measure-text{fill:#a9eafa;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle;letter-spacing:.03em}
+.measure-text.strong{fill:#e4fbff}
+.selection-box{fill:none;stroke:#67e8ff;stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-dasharray:5 4;opacity:.9;pointer-events:none}
+.selection-handle{fill:#072138;stroke:#67e8ff;stroke-width:1.8;vector-effect:non-scaling-stroke;pointer-events:none}
+.handle-hit{fill:transparent;stroke:none;pointer-events:all;cursor:pointer}
+.rotate-line{stroke:rgba(103,232,255,.55);stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:3 3;pointer-events:none}
+.rotate-glyph{stroke:#67e8ff;fill:none;stroke-width:1.7;vector-effect:non-scaling-stroke;pointer-events:none}
+.wall-endpoint{fill:#062037;stroke:#67e8ff;stroke-width:1.8;vector-effect:non-scaling-stroke;pointer-events:none}
+.guide-line{stroke:rgba(103,232,255,.36);stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:2 5;pointer-events:none}
+.snap-ring{fill:none;stroke:#c7f8ff;stroke-width:1.4;vector-effect:non-scaling-stroke;pointer-events:none}
+.snap-dot{fill:#c7f8ff;pointer-events:none}
+.preview-fill{fill:rgba(103,232,255,.075);stroke:#73e7ff;stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-dasharray:6 4;pointer-events:none}
+.preview-line{stroke:#9af3ff;fill:none;stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:7 5;stroke-linecap:round;pointer-events:none}
+.preview-dot{fill:#c8f9ff;pointer-events:none}
+@keyframes sheetUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media(max-width:900px){
+  .inspector{position:absolute;left:8px;right:8px;bottom:8px;width:auto;flex-basis:auto;max-height:44dvh;border:1px solid rgba(103,232,255,.25);border-radius:18px;display:none;z-index:30;padding:12px 13px;box-shadow:0 24px 70px rgba(0,0,0,.58);background:linear-gradient(170deg,rgba(9,39,68,.97),rgba(4,21,40,.985))}
+  .inspector.open{display:block;animation:sheetUp .2s}
+  .inspector .desktop-only{display:none}
+  .canvas-hint{bottom:11px;max-width:calc(100% - 190px);left:52%}
+}
+@media(max-width:620px){
+  .topbar{height:calc(54px + var(--safeTop));gap:7px;padding-left:9px;padding-right:7px}
+  .brand-mark{width:32px;height:32px;flex-basis:32px;border-radius:9px;font-size:11.5px}
+  .brand-title{font-size:10.5px;letter-spacing:.07em}.brand-sub{font-size:6.5px;letter-spacing:.12em}
+  .area-chip{padding:5px 8px;gap:5px;border-radius:10px}.area-chip .label{display:none}.area-chip strong{font-size:12px}.area-chip small{font-size:7.5px}
+  .icon-btn{height:34px;min-width:34px;border-radius:9px}.icon-btn svg{width:17px;height:17px}
+  .export-btn{width:34px;min-width:34px;padding:0;border-radius:9px}.export-btn span{display:none}
+  .canvas-controls{left:8px;top:8px;padding:3px;gap:1px;border-radius:12px}.canvas-btn{width:34px;height:34px;border-radius:9px}.canvas-sep{margin:0 1px;height:18px}
+  .canvas-hint{bottom:10px;left:50%;max-width:calc(100% - 156px);font-size:8px;padding:5px 9px;white-space:nowrap}
+  .scale-readout{left:10px;bottom:10px;font-size:7.5px;gap:5px}.canvas-watermark{right:10px;bottom:9px}.canvas-watermark b{font-size:6.5px}.canvas-watermark span{display:none}
+  .toolbar{height:calc(62px + var(--safe));padding:4px 4px var(--safe);gap:0}.tool{border-radius:10px;gap:3px}.tool svg{width:19px;height:19px}.tool span{font-size:7px;letter-spacing:.02em}
+  .inspector{max-height:46dvh;left:6px;right:6px;bottom:6px}.insp-title{font-size:14px}.field input,.field select{height:40px;font-size:11px}.btn{height:38px}
+  .modal{padding:12px}.modal-card{padding:15px;border-radius:16px}
+}
+@media(max-width:390px){.brand-title{font-size:9.5px}.brand-sub{display:none}.area-chip strong{font-size:11px}.scale-readout span{display:none}}
+@media(min-width:901px){.canvas-hint{left:auto;right:14px;transform:none;bottom:12px}.canvas-watermark{right:auto;left:14px;align-items:flex-start;bottom:34px}.scale-readout{bottom:13px;left:14px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-cursor" viewBox="0 0 24 24"><path d="M5 3l6.8 17 2.2-7 7-2.2L5 3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M13.8 13.8L19 19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-wall" viewBox="0 0 24 24"><path d="M3 7h18M3 17h18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><circle cx="3" cy="7" r="2.1" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="21" cy="17" r="2.1" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+<symbol id="i-room" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 12h17M12 3.5v17" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></symbol>
+<symbol id="i-object" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/></symbol>
+<symbol id="i-door" viewBox="0 0 24 24"><path d="M5 3v18M5 4h11v16H5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16 4a12 12 0 0 0 0 16" fill="none" stroke="currentColor" stroke-width="1" opacity=".6" stroke-dasharray="2 2"/><circle cx="13.4" cy="12" r=".9" fill="currentColor"/></symbol>
+<symbol id="i-window" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 6v12M3 12h18" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".65"/></symbol>
+<symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 12V6.5a1.5 1.5 0 0 1 3 0V11m0-5.5a1.5 1.5 0 0 1 3 0V11m0-4.5a1.5 1.5 0 0 1 3 0V12m0-3.5a1.5 1.5 0 0 1 3 0V14c0 4.2-2.5 7-6.5 7h-1.2c-2 0-3.3-.8-4.4-2.4L5 15.2a1.7 1.7 0 0 1 2.6-2.1L8 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 7L4 12l5 5M4.5 12H14a5.5 5.5 0 1 1 0 11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 7l5 5-5 5M19.5 12H10a5.5 5.5 0 1 0 0 11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 10h16M4 16h16M10 4v16M16 4v16" fill="none" stroke="currentColor" stroke-width="1.45"/></symbol>
+<symbol id="i-dims" viewBox="0 0 24 24"><path d="M4 8v8M20 8v8M4 12h16M7 9l-3 3 3 3M17 9l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-magnet" viewBox="0 0 24 24"><path d="M5 4v8a7 7 0 0 0 14 0V4h-4v8a3 3 0 0 1-6 0V4H5z" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><path d="M5 8h4M15 8h4" fill="none" stroke="currentColor" stroke-width="1.65"/></symbol>
+<symbol id="i-fit" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+<symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3v12M7.5 10.5L12 15l4.5-4.5M5 17v3h14v-3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8.5" cy="9" r="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4 18l5-5 3 3 2-2 5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-vector" viewBox="0 0 24 24"><path d="M5 19L19 5M5 5h14v14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="5" cy="19" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="19" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 6M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3z" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></symbol>
+</defs></svg>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">N1</div><div><div class="brand-title">Blueprint Studio</div><div class="brand-sub">Made by NetworK1NG</div></div></div>
+    <div class="area-chip" title="Total room floor area"><span class="label">Floor area</span><strong class="mono"><span id="areaValue">0.00</span> <small>m²</small></strong></div>
+    <div class="top-actions">
+      <button class="icon-btn" id="undoBtn" title="Undo (Ctrl+Z)" aria-label="Undo"><svg><use href="#i-undo"/></svg></button>
+      <button class="icon-btn" id="redoBtn" title="Redo" aria-label="Redo"><svg><use href="#i-redo"/></svg></button>
+      <button class="export-btn" id="exportBtn" title="Project & export" aria-label="Project and export"><svg><use href="#i-export"/></svg><span>Export</span></button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <div class="canvas-wrap" id="canvasWrap">
+      <svg id="board" class="tool-select" role="application" aria-label="Interactive floor plan canvas">
+        <g id="viewport"><g id="gridLayer"></g><g id="roomsLayer"></g><g id="objectsLayer"></g><g id="wallsLayer"></g><g id="openingsLayer"></g><g id="overlayLayer"></g><g id="selectionLayer"></g></g>
+      </svg>
+      <div class="canvas-controls" role="toolbar" aria-label="View controls">
+        <button class="canvas-btn active" id="gridBtn" title="Toggle grid (G)" aria-label="Toggle grid"><svg><use href="#i-grid"/></svg></button>
+        <button class="canvas-btn active" id="dimsBtn" title="Toggle dimensions (M)" aria-label="Toggle dimensions"><svg><use href="#i-dims"/></svg></button>
+        <button class="canvas-btn active" id="snapBtn" title="Toggle snapping" aria-label="Toggle snapping"><svg><use href="#i-magnet"/></svg></button>
+        <span class="canvas-sep"></span>
+        <button class="canvas-btn" id="zoomOutBtn" aria-label="Zoom out"><svg><use href="#i-minus"/></svg></button>
+        <button class="canvas-btn" id="zoomInBtn" aria-label="Zoom in"><svg><use href="#i-plus"/></svg></button>
+        <button class="canvas-btn" id="fitBtn" aria-label="Fit plan"><svg><use href="#i-fit"/></svg></button>
+      </div>
+      <div class="scale-readout"><span>SCALE</span><div class="scale-bar" id="scaleBar"></div><span id="scaleLabel">1 m</span></div>
+      <div class="canvas-hint" id="canvasHint">Tap an element to edit · pinch to zoom</div>
+      <div class="canvas-watermark"><b>MADE BY NETWORK1NG</b><span>BLUEPRINT STUDIO / N1</span></div>
+    </div>
+    <aside class="inspector" id="inspector" aria-label="Inspector"></aside>
+  </main>
+
+  <nav class="toolbar" aria-label="Drawing tools">
+    <button class="tool active" data-tool="select" aria-label="Select tool"><svg><use href="#i-cursor"/></svg><span>Select</span></button>
+    <button class="tool" data-tool="wall" aria-label="Wall tool"><svg><use href="#i-wall"/></svg><span>Wall</span></button>
+    <button class="tool" data-tool="room" aria-label="Room tool"><svg><use href="#i-room"/></svg><span>Room</span></button>
+    <button class="tool" data-tool="object" aria-label="Object tool"><svg><use href="#i-object"/></svg><span>Object</span></button>
+    <button class="tool" data-tool="door" aria-label="Door tool"><svg><use href="#i-door"/></svg><span>Door</span></button>
+    <button class="tool" data-tool="window" aria-label="Window tool"><svg><use href="#i-window"/></svg><span>Window</span></button>
+    <button class="tool" data-tool="hand" aria-label="Pan tool"><svg><use href="#i-hand"/></svg><span>Pan</span></button>
+  </nav>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal" id="projectModal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-card">
+    <div class="modal-head"><div class="brand-mark" aria-hidden="true">N1</div><div><h2 class="modal-title" id="projectModalTitle">Blueprint Studio</h2><div class="modal-sub">Project &amp; export · Made by NetworK1NG</div></div><button class="modal-close" data-close-modal aria-label="Close"><svg><use href="#i-close"/></svg></button></div>
+    <div class="modal-stats"><div class="modal-stat"><b id="modalArea">0.00</b><span>Floor m²</span></div><div class="modal-stat"><b id="modalRooms">0</b><span>Rooms</span></div><div class="modal-stat"><b id="modalWalls">0</b><span>Walls</span></div></div>
+    <div class="section-label" style="margin-top:0">Export plan</div>
+    <div class="export-grid">
+      <button class="export-option" id="exportPng"><svg><use href="#i-image"/></svg><b>PNG image</b><span>High-resolution raster with title block &amp; watermark.</span></button>
+      <button class="export-option" id="exportSvg"><svg><use href="#i-vector"/></svg><b>SVG vector</b><span>Scalable blueprint view for print or editing.</span></button>
+    </div>
+    <div class="modal-actions"><div class="row"><button class="btn grow" id="loadDemoBtn"><svg><use href="#i-spark"/></svg>Load demo</button><button class="btn grow danger" id="newPlanBtn"><svg><use href="#i-refresh"/></svg>New plan</button></div></div>
+    <div class="brand-footer">Crafted for precise spaces · <b>Made by NetworK1NG</b></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = (s, root = document) => root.querySelector(s);
+  const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const rad = d => d * Math.PI / 180;
+  const deg = r => r * 180 / Math.PI;
+  const fmt = (v, n = 2) => (Number.isFinite(v) ? v : 0).toFixed(n);
+  const fmtShort = v => {
+    if (!Number.isFinite(v)) return '0';
+    return (Math.abs(v) < .005 ? '0' : v.toFixed(2)).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+  };
+  const clone = obj => JSON.parse(JSON.stringify(obj));
+  const uid = p => p + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const board = $('#board'), viewport = $('#viewport');
+  const gridLayer = $('#gridLayer'), roomsLayer = $('#roomsLayer'), objectsLayer = $('#objectsLayer');
+  const wallsLayer = $('#wallsLayer'), openingsLayer = $('#openingsLayer');
+  const overlayLayer = $('#overlayLayer'), selectionLayer = $('#selectionLayer');
+  const inspector = $('#inspector'), canvasWrap = $('#canvasWrap');
+  const modal = $('#projectModal'), toastEl = $('#toast');
+  const COLORS = {
+    canvas:'#061a30', wall:'#e6fbff', cyan:'#67e8ff', object:'#7ee8f8',
+    rooms:['#58d9ee','#7ce0c5','#88c8ff','#6edce3','#9ad9bf','#7ad6ff']
+  };
+
+  const state = {
+    tool:'select', showGrid:true, showDims:true, snap:true,
+    view:{ scale:56, tx:0, ty:0 }, items:[], selection:null,
+    preview:null, activeSnap:null, interaction:null, pointers:new Map(),
+    gestureLock:false, history:[], future:[], editSnapshot:null,
+    initialized:false, renderFrame:0, shapeKind:'rect'
+  };
+  let W = 0, H = 0;
+
+  function demoPlan(){
+    const rooms = [
+      { id:'room_living', type:'room', label:'LIVING', x:0, y:0, w:7.2, h:5, rot:0, color:COLORS.rooms[0] },
+      { id:'room_bed', type:'room', label:'BEDROOM', x:7.2, y:0, w:4.8, h:4.2, rot:0, color:COLORS.rooms[1] },
+      { id:'room_hall', type:'room', label:'HALL', x:7.2, y:4.2, w:4.8, h:3.8, rot:0, color:COLORS.rooms[2] },
+      { id:'room_kitchen', type:'room', label:'KITCHEN', x:0, y:5, w:3.8, h:3, rot:0, color:COLORS.rooms[3] },
+      { id:'room_bath', type:'room', label:'BATH', x:3.8, y:5, w:3.4, h:3, rot:0, color:COLORS.rooms[4] }
+    ];
+    const walls = [
+      { id:'wall_top', type:'wall', x1:0, y1:0, x2:12, y2:0, thickness:.18 },
+      { id:'wall_right', type:'wall', x1:12, y1:0, x2:12, y2:8, thickness:.18 },
+      { id:'wall_bottom', type:'wall', x1:12, y1:8, x2:0, y2:8, thickness:.18 },
+      { id:'wall_left', type:'wall', x1:0, y1:8, x2:0, y2:0, thickness:.18 },
+      { id:'wall_spine', type:'wall', x1:7.2, y1:0, x2:7.2, y2:8, thickness:.14 },
+      { id:'wall_mid', type:'wall', x1:0, y1:5, x2:7.2, y2:5, thickness:.14 },
+      { id:'wall_bath', type:'wall', x1:3.8, y1:5, x2:3.8, y2:8, thickness:.12 },
+      { id:'wall_bed', type:'wall', x1:7.2, y1:4.2, x2:12, y2:4.2, thickness:.14 }
+    ];
+    const openings = [
+      { id:'door_entry', type:'door', wallId:'wall_bottom', t:.78, width:1, swing:-1 },
+      { id:'door_bed', type:'door', wallId:'wall_spine', t:.28, width:.9, swing:-1 },
+      { id:'door_bath', type:'door', wallId:'wall_mid', t:.76, width:.78, swing:1 },
+      { id:'door_kitchen', type:'door', wallId:'wall_mid', t:.24, width:.9, swing:1 },
+      { id:'door_hall', type:'door', wallId:'wall_spine', t:.8, width:.9, swing:1 },
+      { id:'door_hall2', type:'door', wallId:'wall_bed', t:.5, width:.82, swing:1 },
+      { id:'win_top1', type:'window', wallId:'wall_top', t:.28, width:2 },
+      { id:'win_top2', type:'window', wallId:'wall_top', t:.78, width:1.8 },
+      { id:'win_left', type:'window', wallId:'wall_left', t:.27, width:1.6 },
+      { id:'win_right', type:'window', wallId:'wall_right', t:.76, width:1.4 }
+    ];
+    const objects = [
+      { id:'obj_sofa', type:'object', shape:'rect', label:'SOFA', x:.9, y:.8, w:2.4, h:.82, rot:0, color:COLORS.rooms[0] },
+      { id:'obj_bed', type:'object', shape:'rect', label:'BED', x:8.8, y:1, w:1.9, h:2.2, rot:0, color:COLORS.rooms[1] },
+      { id:'obj_island', type:'object', shape:'rect', label:'ISLAND', x:1.2, y:6.3, w:1.6, h:.72, rot:0, color:COLORS.rooms[3] },
+      { id:'obj_table', type:'object', shape:'circle', label:'TABLE', x:4.6, y:6.1, w:1.15, h:1.15, rot:0, color:COLORS.rooms[2] }
+    ];
+    return [...rooms, ...walls, ...openings, ...objects];
+  }
+
+  /* geometry */
+  function screenPoint(e){ const r = board.getBoundingClientRect(); return { x:e.clientX - r.left, y:e.clientY - r.top }; }
+  function toWorld(p){ return { x:(p.x - state.view.tx) / state.view.scale, y:(p.y - state.view.ty) / state.view.scale }; }
+  function visibleBounds(pad = 0){
+    return { x0:-state.view.tx / state.view.scale - pad, y0:-state.view.ty / state.view.scale - pad,
+      x1:(W - state.view.tx) / state.view.scale + pad, y1:(H - state.view.ty) / state.view.scale + pad };
+  }
+  function getItem(id){ return state.items.find(i => i.id === id) || null; }
+  function getCenter(item){ return item.type === 'wall' ? { x:(item.x1 + item.x2) / 2, y:(item.y1 + item.y2) / 2 } : { x:item.x + item.w / 2, y:item.y + item.h / 2 }; }
+  function wallLength(w){ return Math.hypot(w.x2 - w.x1, w.y2 - w.y1); }
+  function roomArea(r){ return Math.max(0, r.w * r.h); }
+  function totalArea(){ return state.items.reduce((a, i) => i.type === 'room' ? a + roomArea(i) : a, 0); }
+  function rotatedPoint(px, py, cx, cy, rotation){
+    const a = rad(rotation || 0), c = Math.cos(a), s = Math.sin(a), dx = px - cx, dy = py - cy;
+    return { x:cx + dx * c - dy * s, y:cy + dx * s + dy * c };
+  }
+  function rotatedCorners(item){
+    const c = getCenter(item);
+    return [
+      rotatedPoint(item.x, item.y, c.x, c.y, item.rot),
+      rotatedPoint(item.x + item.w, item.y, c.x, c.y, item.rot),
+      rotatedPoint(item.x + item.w, item.y + item.h, c.x, c.y, item.rot),
+      rotatedPoint(item.x, item.y + item.h, c.x, c.y, item.rot)
+    ];
+  }
+  function pointToSegment(p, a, b){
+    const dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy;
+    let t = l2 ? ((p.x - a.x) * dx + (p.y - a.y) * dy) / l2 : 0;
+    t = clamp(t, 0, 1);
+    const x = a.x + dx * t, y = a.y + dy * t;
+    return { t, x, y, dist:Math.hypot(p.x - x, p.y - y) };
+  }
+  function pointInItem(p, item){
+    if (item.type === 'wall') {
+      const d = pointToSegment(p, { x:item.x1, y:item.y1 }, { x:item.x2, y:item.y2 });
+      return d.dist <= Math.max(item.thickness * 1.8, .25);
+    }
+    if (item.type === 'door' || item.type === 'window') {
+      const g = openingGeometry(item);
+      return g ? pointToSegment(p, g.a, g.b).dist <= Math.max(g.wall.thickness * 2, .3) : false;
+    }
+    const c = getCenter(item), a = rad(-(item.rot || 0)), dx = p.x - c.x, dy = p.y - c.y;
+    const lx = c.x + dx * Math.cos(a) - dy * Math.sin(a);
+    const ly = c.y + dx * Math.sin(a) + dy * Math.cos(a);
+    if (item.type === 'object' && item.shape === 'circle') {
+      const rx = Math.max(.01, item.w / 2), ry = Math.max(.01, item.h / 2);
+      return ((lx - c.x) ** 2) / (rx * rx) + ((ly - c.y) ** 2) / (ry * ry) <= 1.15;
+    }
+    return lx >= item.x - .08 && lx <= item.x + item.w + .08 && ly >= item.y - .08 && ly <= item.y + item.h + .08;
+  }
+  function openingGeometry(op){
+    const wall = getItem(op.wallId);
+    if (!wall || wall.type !== 'wall') return null;
+    const len = wallLength(wall);
+    if (len < .01) return null;
+    const ux = (wall.x2 - wall.x1) / len, uy = (wall.y2 - wall.y1) / len;
+    const nx = -uy, ny = ux, t = clamp(op.t, 0, 1);
+    const cx = wall.x1 + (wall.x2 - wall.x1) * t, cy = wall.y1 + (wall.y2 - wall.y1) * t;
+    const half = Math.min(op.width, len) / 2;
+    return {
+      wall, len, ux, uy, nx, ny, cx, cy, half,
+      a:{ x:cx - ux * half, y:cy - uy * half },
+      b:{ x:cx + ux * half, y:cy + uy * half },
+      gapStart:Math.max(0, t * len - half), gapEnd:Math.min(len, t * len + half)
+    };
+  }
+
+  /* rendering primitives */
+  function svg(tag, attrs = {}, children = []){
+    const node = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) if (v !== undefined && v !== null) node.setAttribute(k, String(v));
+    for (const child of children) {
+      if (child === null || child === undefined) continue;
+      node.appendChild(typeof child === 'string' ? document.createTextNode(child) : child);
+    }
+    return node;
+  }
+  function addText(parent, text, x, y, attrs = {}){ parent.appendChild(svg('text', { x, y, ...attrs }, [String(text)])); }
+  function makePill(text, x, y, scale, opts = {}){
+    const size = opts.size || 9.5, h = 17 / scale;
+    const w = Math.max(30 / scale, (String(text).length * size * .61 + 12) / scale);
+    const g = svg('g', { 'pointer-events':'none', opacity:opts.opacity ?? 1 });
+    g.appendChild(svg('rect', { x:x - w / 2, y:y - h / 2, width:w, height:h, rx:4 / scale, class:'measure-pill' }));
+    g.appendChild(svg('text', { x, y:y + .4 / scale, class:'measure-text' + (opts.strong ? ' strong' : ''), style:`font-size:${size / scale}px` }, [String(text)]));
+    return g;
+  }
+
+  function buildGrid(scale, b, withLabels){
+    const g = svg('g');
+    if (!state.showGrid) return g;
+    const candidates = [.1, .2, .5, 1, 2, 5, 10, 20, 50, 100];
+    let step = candidates[candidates.length - 1];
+    for (const c of candidates) { if (c * scale >= 16) { step = c; break; } }
+    const majorStep = scale >= 26 ? 1 : step * 5;
+    const labelStep = scale >= 46 ? 2 : scale >= 24 ? 5 : 10;
+    const x0 = Math.floor(b.x0 / step) * step, y0 = Math.floor(b.y0 / step) * step;
+    let minor = '', major = '';
+    for (let x = x0; x <= b.x1 + step * .5; x += step) {
+      if (Math.abs(x) < 1e-7) continue;
+      const seg = `M${x.toFixed(4)} ${b.y0.toFixed(4)}V${b.y1.toFixed(4)}`;
+      if (Math.abs(x / majorStep - Math.round(x / majorStep)) < .0001) major += seg; else minor += seg;
+    }
+    for (let y = y0; y <= b.y1 + step * .5; y += step) {
+      if (Math.abs(y) < 1e-7) continue;
+      const seg = `M${b.x0.toFixed(4)} ${y.toFixed(4)}H${b.x1.toFixed(4)}`;
+      if (Math.abs(y / majorStep - Math.round(y / majorStep)) < .0001) major += seg; else minor += seg;
+    }
+    if (minor) g.appendChild(svg('path', { d:minor, class:'grid-minor' }));
+    if (major) g.appendChild(svg('path', { d:major, class:'grid-major' }));
+    if (b.x0 <= 0 && b.x1 >= 0) g.appendChild(svg('path', { d:`M0 ${b.y0}V${b.y1}`, class:'grid-axis' }));
+    if (b.y0 <= 0 && b.y1 >= 0) g.appendChild(svg('path', { d:`M${b.x0} 0H${b.x1}`, class:'grid-axis' }));
+    if (withLabels) {
+      const fs = 8.5 / scale, ly = b.y0 + 12 / scale, lx = b.x0 + 8 / scale;
+      for (let x = Math.ceil(b.x0 / labelStep) * labelStep; x <= b.x1; x += labelStep) {
+        addText(g, fmtShort(x), x, ly, { class:'grid-label', style:`font-size:${fs}px`, 'text-anchor':'middle', opacity:.86 });
+      }
+      for (let y = Math.ceil(b.y0 / labelStep) * labelStep; y <= b.y1; y += labelStep) {
+        addText(g, fmtShort(y), lx, y, { class:'grid-label', style:`font-size:${fs}px`, opacity:.7 });
+      }
+    }
+    return g;
+  }
+
+  function buildRoom(room, scale){
+    const g = svg('g', { class:'item room', 'data-id':room.id });
+    const c = getCenter(room);
+    const inner = svg('g', { transform:room.rot ? `rotate(${room.rot} ${c.x} ${c.y})` : '' });
+    inner.appendChild(svg('rect', { x:room.x, y:room.y, width:room.w, height:room.h, rx:.035, fill:room.color, 'fill-opacity':.105, class:'room-floor' }));
+    inner.appendChild(svg('rect', { x:room.x, y:room.y, width:room.w, height:room.h, rx:.035, stroke:room.color, class:'room-stroke' }));
+    g.appendChild(inner);
+    const pixelMin = Math.min(room.w, room.h) * scale;
+    if (pixelMin > 26) {
+      addText(g, room.label || 'ROOM', c.x, c.y - 4 / scale, { class:'room-label', style:`font-size:${clamp(10.5, 7, 13) / scale}px` });
+      if (pixelMin > 55) addText(g, `${fmt(roomArea(room))} m²`, c.x, c.y + 11 / scale, { class:'room-area', style:`font-size:${8 / scale}px`, opacity:.9 });
+    }
+    return g;
+  }
+
+  function buildObject(obj, scale){
+    const g = svg('g', { class:'item object', 'data-id':obj.id });
+    const c = getCenter(obj);
+    const inner = svg('g', { transform:obj.rot ? `rotate(${obj.rot} ${c.x} ${c.y})` : '' });
+    if (obj.shape === 'circle') {
+      inner.appendChild(svg('ellipse', { cx:c.x, cy:c.y, rx:obj.w / 2, ry:obj.h / 2, fill:obj.color, 'fill-opacity':.14, class:'object-fill' }));
+      inner.appendChild(svg('ellipse', { cx:c.x, cy:c.y, rx:obj.w / 2, ry:obj.h / 2, class:'object-stroke' }));
+    } else {
+      const r = Math.min(.06, obj.w * .08, obj.h * .08);
+      inner.appendChild(svg('rect', { x:obj.x, y:obj.y, width:obj.w, height:obj.h, rx:r, fill:obj.color, 'fill-opacity':.13, class:'object-fill' }));
+      inner.appendChild(svg('rect', { x:obj.x, y:obj.y, width:obj.w, height:obj.h, rx:r, class:'object-stroke' }));
+    }
+    g.appendChild(inner);
+    if (Math.min(obj.w, obj.h) * scale > 34 && obj.label) {
+      addText(g, obj.label, c.x, c.y, { class:'object-label', style:`font-size:${8.5 / scale}px` });
+    }
+    return g;
+  }
+
+  function buildWall(wall, scale){
+    const g = svg('g', { class:'item wall', 'data-id':wall.id });
+    const selected = state.selection === wall.id, len = wallLength(wall);
+    if (selected) g.appendChild(svg('line', { x1:wall.x1, y1:wall.y1, x2:wall.x2, y2:wall.y2, class:'wall-selected-glow', 'stroke-width':wall.thickness + .12 }));
+    g.appendChild(svg('line', { x1:wall.x1, y1:wall.y1, x2:wall.x2, y2:wall.y2, class:'wall-glow', 'stroke-width':wall.thickness + .055 }));
+    g.appendChild(svg('line', { x1:wall.x1, y1:wall.y1, x2:wall.x2, y2:wall.y2, class:'wall-core', 'stroke-width':wall.thickness, stroke:selected ? COLORS.cyan : COLORS.wall }));
+    g.appendChild(svg('line', { x1:wall.x1, y1:wall.y1, x2:wall.x2, y2:wall.y2, class:'wall-hit', 'stroke-width':Math.max(.36, 24 / scale) }));
+    if (state.showDims || selected) {
+      const mx = (wall.x1 + wall.x2) / 2, my = (wall.y1 + wall.y2) / 2;
+      const nx = -(wall.y2 - wall.y1) / Math.max(len, .01), ny = (wall.x2 - wall.x1) / Math.max(len, .01);
+      const off = wall.thickness / 2 + .25;
+      g.appendChild(makePill(`${fmt(len)} m`, mx + nx * off, my + ny * off, scale, { size:selected ? 10 : 9, strong:selected, opacity:selected ? 1 : .86 }));
+    }
+    return g;
+  }
+
+  function buildOpening(op, scale, preview = false){
+    const geo = openingGeometry(op);
+    if (!geo) return null;
+    const { wall, ux, uy, nx, ny, cx, cy, half, a, b } = geo;
+    const g = svg('g', { class:'item opening', 'data-id':op.id, opacity:preview ? .7 : 1 });
+    g.appendChild(svg('line', { x1:a.x, y1:a.y, x2:b.x, y2:b.y, class:'open-gap', 'stroke-width':Math.max(wall.thickness + .055, .09) }));
+    const depth = wall.thickness / 2 + .025;
+    for (const p of [a, b]) g.appendChild(svg('line', { x1:p.x - nx * depth, y1:p.y - ny * depth, x2:p.x + nx * depth, y2:p.y + ny * depth, class:'open-ink', opacity:.72 }));
+    if (op.type === 'door') {
+      const w = Math.min(op.width, geo.len), hingeRight = !!op.hinge;
+      const hinge = hingeRight ? { x:cx + ux * half, y:cy + uy * half } : { x:cx - ux * half, y:cy - uy * half };
+      const closed = { x:hinge.x + (hingeRight ? -1 : 1) * ux * w, y:hinge.y + (hingeRight ? -1 : 1) * uy * w };
+      const open = { x:hinge.x + nx * w * op.swing, y:hinge.y + ny * w * op.swing };
+      g.appendChild(svg('line', { x1:hinge.x, y1:hinge.y, x2:open.x, y2:open.y, class:'open-ink' }));
+      const sweep = (hingeRight ? -op.swing : op.swing) > 0 ? 1 : 0;
+      g.appendChild(svg('path', { d:`M${closed.x} ${closed.y} A${w} ${w} 0 0 ${sweep} ${open.x} ${open.y}`, class:'open-arc' }));
+    } else {
+      const inset = wall.thickness * .17;
+      g.appendChild(svg('line', { x1:a.x + nx * inset, y1:a.y + ny * inset, x2:b.x + nx * inset, y2:b.y + ny * inset, class:'open-ink', opacity:.92 }));
+      g.appendChild(svg('line', { x1:a.x - nx * inset, y1:a.y - ny * inset, x2:b.x - nx * inset, y2:b.y - ny * inset, class:'open-ink', opacity:.92 }));
+      g.appendChild(svg('line', { x1:a.x, y1:a.y, x2:b.x, y2:b.y, class:'open-ink', opacity:.38 }));
+    }
+    g.appendChild(svg('line', { x1:a.x, y1:a.y, x2:b.x, y2:b.y, class:'open-hit', 'stroke-width':Math.max(.42, 24 / scale) }));
+    if (state.showDims || state.selection === op.id) {
+      const off = wall.thickness / 2 + .3, side = op.type === 'door' ? -op.swing : 1;
+      g.appendChild(makePill(`${fmt(op.width)} m`, cx + nx * off * side, cy + ny * off * side, scale, { size:8.5, opacity:.8 }));
+    }
+    return g;
+  }
+
+  function makeHandle(x, y, scale, id, handle, opts = {}){
+    const g = svg('g', { 'data-id':id, 'data-handle':handle });
+    const r = opts.r || 5.4;
+    if (opts.rotate) {
+      g.appendChild(svg('circle', { cx:x, cy:y, r:r / scale, class:'selection-handle' }));
+      const rr = 2.35 / scale;
+      g.appendChild(svg('path', { d:`M${x - rr} ${y + rr * .3} A${rr} ${rr} 0 1 1 ${x + rr * .2} ${y - rr}`, class:'rotate-glyph' }));
+      g.appendChild(svg('path', { d:`M${x + rr * .1} ${y - rr - 1.2 / scale} l${1.5 / scale} ${1.8 / scale} l${-2.1 / scale} ${.2 / scale}`, fill:COLORS.cyan, stroke:'none' }));
+    } else {
+      g.appendChild(svg('circle', { cx:x, cy:y, r:r / scale, class:opts.endpoint ? 'wall-endpoint' : 'selection-handle' }));
+    }
+    g.appendChild(svg('circle', { cx:x, cy:y, r:19 / scale, class:'handle-hit' }));
+    return g;
+  }
+
+  function buildSelection(item, scale){
+    const g = svg('g');
+    if (item.type === 'wall') {
+      g.appendChild(svg('line', { x1:item.x1, y1:item.y1, x2:item.x2, y2:item.y2, stroke:COLORS.cyan, 'stroke-width':item.thickness + .025, 'stroke-linecap':'round', opacity:.58, 'pointer-events':'none' }));
+      g.appendChild(makeHandle(item.x1, item.y1, scale, item.id, 'p1', { endpoint:true }));
+      g.appendChild(makeHandle(item.x2, item.y2, scale, item.id, 'p2', { endpoint:true }));
+      const c = getCenter(item);
+      g.appendChild(makePill(`${fmt(wallLength(item))} m`, c.x, c.y - .37, scale, { size:9.5, strong:true }));
+      return g;
+    }
+    if (item.type === 'door' || item.type === 'window') {
+      const geo = openingGeometry(item);
+      if (!geo) return g;
+      g.appendChild(svg('line', { x1:geo.a.x, y1:geo.a.y, x2:geo.b.x, y2:geo.b.y, stroke:COLORS.cyan, 'stroke-width':4, 'vector-effect':'non-scaling-stroke', opacity:.34, 'pointer-events':'none' }));
+      g.appendChild(makeHandle(geo.a.x, geo.a.y, scale, item.id, 'o-start', { r:5 }));
+      g.appendChild(makeHandle(geo.b.x, geo.b.y, scale, item.id, 'o-end', { r:5 }));
+      return g;
+    }
+    const c = getCenter(item), rot = item.rot || 0;
+    const inner = svg('g', { transform:rot ? `rotate(${rot} ${c.x} ${c.y})` : '' });
+    inner.appendChild(svg('rect', { x:item.x, y:item.y, width:item.w, height:item.h, class:'selection-box' }));
+    const ro = 34 / scale;
+    inner.appendChild(svg('line', { x1:c.x, y1:item.y, x2:c.x, y2:item.y - ro, class:'rotate-line' }));
+    inner.appendChild(makeHandle(c.x, item.y - ro, scale, item.id, 'rot', { rotate:true, r:6.2 }));
+    inner.appendChild(makeHandle(item.x, item.y, scale, item.id, 'nw'));
+    inner.appendChild(makeHandle(item.x + item.w, item.y, scale, item.id, 'ne'));
+    inner.appendChild(makeHandle(item.x + item.w, item.y + item.h, scale, item.id, 'se'));
+    inner.appendChild(makeHandle(item.x, item.y + item.h, scale, item.id, 'sw'));
+    g.appendChild(inner);
+    if (item.type === 'room') g.appendChild(makePill(`${fmt(item.w)} × ${fmt(item.h)} m`, c.x, item.y + item.h + .38, scale, { size:9, opacity:.9 }));
+    return g;
+  }
+
+  function buildPreview(scale){
+    const g = svg('g', { 'pointer-events':'none' }), p = state.preview;
+    if (!p) return g;
+    if (p.kind === 'wall') {
+      const len = Math.hypot(p.end.x - p.start.x, p.end.y - p.start.y);
+      g.appendChild(svg('line', { x1:p.start.x, y1:p.start.y, x2:p.end.x, y2:p.end.y, class:'preview-line' }));
+      g.appendChild(svg('circle', { cx:p.start.x, cy:p.start.y, r:4.2 / scale, class:'preview-dot' }));
+      g.appendChild(svg('circle', { cx:p.end.x, cy:p.end.y, r:4.2 / scale, class:'preview-dot' }));
+      if (len > .02) {
+        const mx = (p.start.x + p.end.x) / 2, my = (p.start.y + p.end.y) / 2;
+        g.appendChild(makePill(`${fmt(len)} m`, mx, my - .32, scale, { size:10, strong:true }));
+        const angle = (deg(Math.atan2(p.end.y - p.start.y, p.end.x - p.start.x)) + 360) % 360;
+        g.appendChild(makePill(`${fmt(angle, 1)}°`, mx, my + .3, scale, { size:8, opacity:.72 }));
+      }
+    } else if (p.kind === 'room' || p.kind === 'object') {
+      const x = Math.min(p.start.x, p.end.x), y = Math.min(p.start.y, p.end.y);
+      const w = Math.abs(p.end.x - p.start.x), h = Math.abs(p.end.y - p.start.y);
+      g.appendChild(svg('rect', { x, y, width:w, height:h, rx:.04, class:'preview-fill' }));
+      const cx = x + w / 2, cy = y + h / 2;
+      g.appendChild(makePill(`${fmt(w)} × ${fmt(h)} m`, cx, cy, scale, { size:9.5, strong:true }));
+      if (p.kind === 'room' && w > .02 && h > .02) g.appendChild(makePill(`${fmt(w * h)} m²`, cx, cy + .35, scale, { size:8.5, opacity:.8 }));
+    } else if (p.kind === 'opening') {
+      const el = buildOpening(p.op, scale, true);
+      if (el) g.appendChild(el);
+    }
+    return g;
+  }
+
+  function buildSnapUI(scale){
+    const g = svg('g', { 'pointer-events':'none' }), s = state.activeSnap;
+    if (!s) return g;
+    for (const line of (s.guides || [])) g.appendChild(svg('line', { x1:line.x1, y1:line.y1, x2:line.x2, y2:line.y2, class:'guide-line' }));
+    g.appendChild(svg('circle', { cx:s.x, cy:s.y, r:8.5 / scale, class:'snap-ring' }));
+    g.appendChild(svg('circle', { cx:s.x, cy:s.y, r:2.6 / scale, class:'snap-dot' }));
+    if (s.type && s.type !== 'free') {
+      const label = s.type === 'anchor' ? (s.label || 'CORNER') : s.type === 'edge' ? 'EDGE' : s.type === 'align' ? 'ALIGN' : s.type === 'axis' ? 'AXIS' : 'GRID';
+      g.appendChild(makePill(label, s.x, s.y - 16 / scale, scale, { size:7.5, opacity:.9 }));
+    }
+    return g;
+  }
+
+  function scheduleRender(){
+    if (state.renderFrame) return;
+    state.renderFrame = requestAnimationFrame(() => { state.renderFrame = 0; render(); });
+  }
+
+  function render(){
+    if (!W || !H) return;
+    const s = state.view.scale;
+    viewport.setAttribute('transform', `translate(${state.view.tx} ${state.view.ty}) scale(${s})`);
+    gridLayer.replaceChildren(); roomsLayer.replaceChildren(); objectsLayer.replaceChildren();
+    wallsLayer.replaceChildren(); openingsLayer.replaceChildren(); overlayLayer.replaceChildren(); selectionLayer.replaceChildren();
+    if (state.showGrid) gridLayer.appendChild(buildGrid(s, visibleBounds(1), state.showDims));
+    for (const item of state.items) if (item.type === 'room') roomsLayer.appendChild(buildRoom(item, s));
+    for (const item of state.items) if (item.type === 'object') objectsLayer.appendChild(buildObject(item, s));
+    for (const item of state.items) if (item.type === 'wall') wallsLayer.appendChild(buildWall(item, s));
+    for (const item of state.items) if (item.type === 'door' || item.type === 'window') {
+      const el = buildOpening(item, s);
+      if (el) openingsLayer.appendChild(el);
+    }
+    overlayLayer.appendChild(buildPreview(s));
+    overlayLayer.appendChild(buildSnapUI(s));
+    const sel = getItem(state.selection);
+    if (sel) selectionLayer.appendChild(buildSelection(sel, s));
+    updateMetrics();
+    syncInspectorValues();
+  }
+
+  /* snapping */
+  function snapStep(){ const s = state.view.scale; return s > 75 ? .05 : s > 38 ? .1 : .25; }
+  function collectAnchors(excludeId){
+    const anchors = [];
+    for (const item of state.items) {
+      if (item.id === excludeId) continue;
+      if (item.type === 'wall') {
+        anchors.push({ x:item.x1, y:item.y1, kind:'CORNER' });
+        anchors.push({ x:item.x2, y:item.y2, kind:'CORNER' });
+      } else if (item.type === 'room' || item.type === 'object') {
+        const c = getCenter(item);
+        anchors.push({ x:c.x, y:c.y, kind:'CENTER' });
+        for (const p of rotatedCorners(item)) anchors.push({ x:p.x, y:p.y, kind:'CORNER' });
+      }
+    }
+    return anchors;
+  }
+  function snapPoint(world, opts = {}){
+    const v = visibleBounds(2);
+    if (!state.snap) return { x:world.x, y:world.y, type:'free', guides:[] };
+    const th = 14 / state.view.scale, anchors = collectAnchors(opts.excludeId);
+    let best = null, bestD = Infinity;
+    for (const a of anchors) {
+      const d = Math.hypot(a.x - world.x, a.y - world.y);
+      if (d < th && d < bestD) { bestD = d; best = a; }
+    }
+    if (best) return { x:best.x, y:best.y, type:'anchor', label:best.kind, guides:[{ x1:best.x, y1:v.y0, x2:best.x, y2:v.y1 }, { x1:v.x0, y1:best.y, x2:v.x1, y2:best.y }] };
+    for (const item of state.items) {
+      if (item.id === opts.excludeId || item.type !== 'wall') continue;
+      const p = pointToSegment(world, { x:item.x1, y:item.y1 }, { x:item.x2, y:item.y2 });
+      if (p.dist < th && p.dist < bestD) { bestD = p.dist; best = { x:p.x, y:p.y, kind:'EDGE' }; }
+    }
+    if (best) return { x:best.x, y:best.y, type:'edge', guides:[{ x1:best.x, y1:v.y0, x2:best.x, y2:v.y1 }, { x1:v.x0, y1:best.y, x2:v.x1, y2:best.y }] };
+    let ax = null, ay = null, dx = Infinity, dy = Infinity;
+    for (const a of anchors) {
+      if (Math.abs(a.x - world.x) < th && Math.abs(a.x - world.x) < dx) { dx = Math.abs(a.x - world.x); ax = a.x; }
+      if (Math.abs(a.y - world.y) < th && Math.abs(a.y - world.y) < dy) { dy = Math.abs(a.y - world.y); ay = a.y; }
+    }
+    let x = ax !== null ? ax : world.x, y = ay !== null ? ay : world.y;
+    const guides = [];
+    if (ax !== null) guides.push({ x1:ax, y1:v.y0, x2:ax, y2:v.y1 });
+    if (ay !== null) guides.push({ x1:v.x0, y1:ay, x2:v.x1, y2:ay });
+    if (opts.origin) {
+      const ox = opts.origin.x, oy = opts.origin.y;
+      if (Math.abs(world.y - oy) < th * 1.25 && Math.abs(world.x - ox) > .03) { y = oy; guides.push({ x1:v.x0, y1:oy, x2:v.x1, y2:oy }); }
+      else if (Math.abs(world.x - ox) < th * 1.25 && Math.abs(world.y - oy) > .03) { x = ox; guides.push({ x1:ox, y1:v.y0, x2:ox, y2:v.y1 }); }
+    }
+    if (ax === null) x = Math.round(x / snapStep()) * snapStep();
+    if (ay === null) y = Math.round(y / snapStep()) * snapStep();
+    return { x, y, type:ax !== null || ay !== null ? 'align' : 'grid', guides };
+  }
+  /* interactions */
+  function setActiveSnap(s){ state.activeSnap = s; }
+  function updatePreviewForDrag(it, world){
+    if (it.kind === 'drawWall') {
+      const snapped = snapPoint(world, { origin:it.start });
+      setActiveSnap(snapped);
+      state.preview = { kind:'wall', start:it.start, end:{ x:snapped.x, y:snapped.y } };
+    } else {
+      const snapped = snapPoint(world);
+      setActiveSnap(snapped);
+      state.preview = { kind:it.kind === 'drawRoom' ? 'room' : 'object', start:it.start, end:{ x:snapped.x, y:snapped.y } };
+    }
+  }
+
+  function startSingleInteraction(e, p, world){
+    const handleEl = e.target.closest ? e.target.closest('[data-handle]') : null;
+    const itemEl = e.target.closest ? e.target.closest('[data-id]') : null;
+
+    if (state.tool === 'select') {
+      if (handleEl) {
+        const id = handleEl.getAttribute('data-id'), handle = handleEl.getAttribute('data-handle');
+        const item = getItem(id);
+        if (!item) return;
+        state.selection = id;
+        buildInspector();
+        if (item.type === 'wall' && (handle === 'p1' || handle === 'p2')) {
+          pushHistory();
+          state.interaction = { kind:'resizeWall', id, handle };
+        } else if ((item.type === 'door' || item.type === 'window') && (handle === 'o-start' || handle === 'o-end')) {
+          const geo = openingGeometry(item);
+          if (!geo) return;
+          pushHistory();
+          state.interaction = { kind:'resizeOpening', id, handle, fixedParam:handle === 'o-start' ? geo.gapEnd : geo.gapStart };
+        } else if (handle === 'rot') {
+          const c = getCenter(item);
+          pushHistory();
+          state.interaction = { kind:'rotateItem', id, center:c, startAngle:Math.atan2(world.y - c.y, world.x - c.x), baseRot:item.rot || 0 };
+        } else {
+          pushHistory();
+          state.interaction = { kind:'resizeItem', id, handle, base:clone(item) };
+        }
+        render();
+        return;
+      }
+      if (itemEl) {
+        const id = itemEl.getAttribute('data-id'), item = getItem(id);
+        if (!item) return;
+        state.selection = id;
+        buildInspector();
+        pushHistory();
+        if (item.type === 'wall') state.interaction = { kind:'moveWall', id, startWorld:world, base:clone(item), moved:false };
+        else if (item.type === 'door' || item.type === 'window') state.interaction = { kind:'moveOpening', id, startWorld:world, base:clone(item), moved:false };
+        else state.interaction = { kind:'moveItem', id, startWorld:world, base:clone(item), moved:false };
+        render();
+        return;
+      }
+      state.interaction = { kind:'panView', startScreen:p, startView:{ ...state.view }, moved:false };
+      return;
+    }
+
+    if (state.tool === 'hand') {
+      state.interaction = { kind:'panView', startScreen:p, startView:{ ...state.view }, moved:false };
+      return;
+    }
+
+    if (state.tool === 'wall' || state.tool === 'room' || state.tool === 'object') {
+      const snapped = snapPoint(world);
+      setActiveSnap(snapped);
+      const kind = state.tool === 'wall' ? 'drawWall' : state.tool === 'room' ? 'drawRoom' : 'drawObject';
+      const start = { x:snapped.x, y:snapped.y };
+      state.interaction = { kind, start };
+      state.preview = { kind:state.tool, start, end:{ x:start.x, y:start.y } };
+      render();
+      return;
+    }
+
+    if (state.tool === 'door' || state.tool === 'window') {
+      const near = getNearestWall(world, 1);
+      if (!near) { toast('Tap closer to a wall'); return; }
+      const len = wallLength(near.wall), width = state.tool === 'door' ? .9 : 1.2;
+      const t = clamp(near.t, (width / 2 + .02) / len, 1 - (width / 2 + .02) / len);
+      const op = { id:uid(state.tool), type:state.tool, wallId:near.wall.id, t, width:Math.min(width, len * .8), swing:1 };
+      state.interaction = { kind:'placeOpening', op };
+      state.preview = { kind:'opening', op };
+      state.activeSnap = { x:near.x, y:near.y, type:'edge', guides:[] };
+      render();
+    }
+  }
+
+  function startMultiTouch(){
+    state.interaction = null;
+    state.preview = null;
+    state.activeSnap = null;
+    const pts = Array.from(state.pointers.values());
+    if (pts.length < 2) return;
+    const selected = getItem(state.selection);
+    const bothInside = selected && pts.every(p => pointInItem(toWorld({ x:p.x, y:p.y }), selected));
+    if (state.tool === 'select' && bothInside && (selected.type === 'room' || selected.type === 'object')) {
+      const mid = { x:(pts[0].x + pts[1].x) / 2, y:(pts[0].y + pts[1].y) / 2 };
+      state.interaction = {
+        kind:'itemGesture', id:selected.id, base:clone(selected),
+        startDist:Math.max(8, Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y)),
+        startAngle:Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x),
+        startMid:toWorld(mid)
+      };
+      pushHistory();
+      return;
+    }
+    const a = pts[0], b = pts[1], mid = { x:(a.x + b.x) / 2, y:(a.y + b.y) / 2 };
+    state.interaction = { kind:'pinchView', startDist:Math.max(8, Math.hypot(b.x - a.x, b.y - a.y)), startView:{ ...state.view }, worldAtMid:toWorld(mid) };
+  }
+
+  function onPointerDown(e){
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    try { board.setPointerCapture(e.pointerId); } catch (_) {}
+    const p = screenPoint(e), world = toWorld(p);
+    state.pointers.set(e.pointerId, { x:p.x, y:p.y });
+    if (state.gestureLock) return;
+    if (state.pointers.size === 2) { startMultiTouch(); return; }
+    if (state.pointers.size > 2) return;
+    startSingleInteraction(e, p, world);
+  }
+
+  function onPointerMove(e){
+    if (!state.pointers.has(e.pointerId)) return;
+    const p = screenPoint(e), ptr = state.pointers.get(e.pointerId);
+    ptr.x = p.x; ptr.y = p.y;
+    if (state.gestureLock || !state.interaction) return;
+    const world = toWorld(p), it = state.interaction;
+
+    if (it.kind === 'pinchView') {
+      const pts = Array.from(state.pointers.values()).slice(0, 2);
+      if (pts.length < 2) return;
+      const dist = Math.max(8, Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y));
+      const mid = { x:(pts[0].x + pts[1].x) / 2, y:(pts[0].y + pts[1].y) / 2 };
+      const scale = clamp(it.startView.scale * (dist / it.startDist), 7, 260);
+      state.view.scale = scale;
+      state.view.tx = mid.x - it.worldAtMid.x * scale;
+      state.view.ty = mid.y - it.worldAtMid.y * scale;
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'itemGesture') {
+      const pts = Array.from(state.pointers.values()).slice(0, 2);
+      if (pts.length < 2) return;
+      const item = getItem(it.id);
+      if (!item) return;
+      const dist = Math.max(8, Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y));
+      const angle = Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x);
+      const mid = { x:(pts[0].x + pts[1].x) / 2, y:(pts[0].y + pts[1].y) / 2 };
+      const midWorld = toWorld(mid);
+      const ratio = clamp(dist / it.startDist, .22, 8);
+      let newRot = ((it.base.rot + deg(angle - it.startAngle)) % 360 + 360) % 360;
+      if (state.snap) { const sr = Math.round(newRot / 15) * 15; if (Math.abs(newRot - sr) < 1.2) newRot = sr; }
+      const baseC = { x:it.base.x + it.base.w / 2, y:it.base.y + it.base.h / 2 };
+      const c = { x:baseC.x + midWorld.x - it.startMid.x, y:baseC.y + midWorld.y - it.startMid.y };
+      const w = Math.max(.3, it.base.w * ratio), h = Math.max(.3, it.base.h * ratio);
+      item.w = Math.round(w * 1000) / 1000; item.h = Math.round(h * 1000) / 1000;
+      item.rot = Math.round(newRot * 10) / 10;
+      item.x = c.x - w / 2; item.y = c.y - h / 2;
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'panView') {
+      const dx = p.x - it.startScreen.x, dy = p.y - it.startScreen.y;
+      if (Math.hypot(dx, dy) > 3) it.moved = true;
+      state.view.tx = it.startView.tx + dx;
+      state.view.ty = it.startView.ty + dy;
+      board.classList.add('panning');
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'drawWall' || it.kind === 'drawRoom' || it.kind === 'drawObject') {
+      updatePreviewForDrag(it, world);
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'placeOpening') {
+      const near = getNearestWall(world, 1);
+      if (near) {
+        const len = wallLength(near.wall), width = it.op.width;
+        it.op.wallId = near.wall.id;
+        it.op.t = clamp(near.t, (width / 2 + .02) / len, 1 - (width / 2 + .02) / len);
+        state.preview = { kind:'opening', op:it.op };
+        state.activeSnap = { x:near.x, y:near.y, type:'edge', guides:[] };
+        scheduleRender();
+      }
+      return;
+    }
+
+    if (it.kind === 'moveItem') {
+      const item = getItem(it.id);
+      if (!item) return;
+      let nx = it.base.x + world.x - it.startWorld.x, ny = it.base.y + world.y - it.startWorld.y;
+      if (state.snap) { const st = snapStep(); nx = Math.round(nx / st) * st; ny = Math.round(ny / st) * st; }
+      item.x = Math.round(nx * 1000) / 1000; item.y = Math.round(ny * 1000) / 1000;
+      it.moved = true;
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'moveWall') {
+      const wall = getItem(it.id);
+      if (!wall) return;
+      let dx = world.x - it.startWorld.x, dy = world.y - it.startWorld.y;
+      if (state.snap) { const st = snapStep(); dx = Math.round((it.base.x1 + dx) / st) * st - it.base.x1; dy = Math.round((it.base.y1 + dy) / st) * st - it.base.y1; }
+      wall.x1 = Math.round((it.base.x1 + dx) * 1000) / 1000; wall.y1 = Math.round((it.base.y1 + dy) * 1000) / 1000;
+      wall.x2 = Math.round((it.base.x2 + dx) * 1000) / 1000; wall.y2 = Math.round((it.base.y2 + dy) * 1000) / 1000;
+      it.moved = true;
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'moveOpening') {
+      const op = getItem(it.id);
+      if (!op) return;
+      const geo = openingGeometry({ ...op, t:it.base.t });
+      if (!geo) return;
+      const proj = pointToSegment(world, { x:geo.wall.x1, y:geo.wall.y1 }, { x:geo.wall.x2, y:geo.wall.y2 });
+      const frac = op.width / geo.len;
+      let t = clamp(proj.t, frac / 2 + .005, 1 - frac / 2 - .005);
+      if (state.snap) t = Math.round(t * geo.len / .1) * .1 / geo.len;
+      op.t = clamp(t, frac / 2, 1 - frac / 2);
+      it.moved = true;
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'resizeWall') {
+      const wall = getItem(it.id);
+      if (!wall) return;
+      const snapped = snapPoint(world, { excludeId:wall.id });
+      setActiveSnap(snapped);
+      if (it.handle === 'p1') { wall.x1 = snapped.x; wall.y1 = snapped.y; } else { wall.x2 = snapped.x; wall.y2 = snapped.y; }
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'resizeItem') {
+      const item = getItem(it.id);
+      if (!item) return;
+      const snapped = snapPoint(world, { excludeId:item.id });
+      setActiveSnap(snapped);
+      const sx = it.handle.includes('w') ? -1 : 1, sy = it.handle.includes('n') ? -1 : 1, b = it.base;
+      const bc = { x:b.x + b.w / 2, y:b.y + b.h / 2 };
+      const opp = rotatedPoint(bc.x - sx * b.w / 2, bc.y - sy * b.h / 2, bc.x, bc.y, b.rot);
+      const a = rad(-(b.rot || 0)), dx = snapped.x - opp.x, dy = snapped.y - opp.y;
+      const lx = dx * Math.cos(a) - dy * Math.sin(a), ly = dx * Math.sin(a) + dy * Math.cos(a);
+      const newW = Math.max(.25, sx * lx), newH = Math.max(.25, sy * ly);
+      const center = rotatedPoint(opp.x + sx * newW / 2, opp.y + sy * newH / 2, opp.x, opp.y, b.rot);
+      item.w = Math.round(newW * 1000) / 1000; item.h = Math.round(newH * 1000) / 1000;
+      item.x = Math.round((center.x - newW / 2) * 1000) / 1000; item.y = Math.round((center.y - newH / 2) * 1000) / 1000;
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'rotateItem') {
+      const item = getItem(it.id);
+      if (!item) return;
+      const angle = Math.atan2(world.y - it.center.y, world.x - it.center.x);
+      let next = ((it.baseRot + deg(angle - it.startAngle)) % 360 + 360) % 360;
+      if (state.snap) { const sr = Math.round(next / 15) * 15; if (Math.abs(next - sr) < 1.4) next = sr; }
+      item.rot = Math.round(next * 10) / 10;
+      scheduleRender();
+      return;
+    }
+
+    if (it.kind === 'resizeOpening') {
+      const op = getItem(it.id);
+      if (!op) return;
+      const geo = openingGeometry(op);
+      if (!geo) return;
+      const proj = pointToSegment(world, { x:geo.wall.x1, y:geo.wall.y1 }, { x:geo.wall.x2, y:geo.wall.y2 });
+      let param = clamp(proj.t * geo.len, .1, geo.len - .1);
+      if (state.snap) param = Math.round(param / .05) * .05;
+      let startP, endP;
+      if (it.handle === 'o-start') { startP = Math.min(param, it.fixedParam - .2); endP = it.fixedParam; }
+      else { startP = it.fixedParam; endP = Math.max(param, it.fixedParam + .2); }
+      const width = clamp(endP - startP, .2, geo.len - .05);
+      op.width = Math.round(width * 100) / 100;
+      op.t = clamp((startP + endP) / 2 / geo.len, op.width / 2 / geo.len, 1 - op.width / 2 / geo.len);
+      scheduleRender();
+    }
+  }
+
+  function onPointerUp(e){
+    const had = state.pointers.has(e.pointerId);
+    state.pointers.delete(e.pointerId);
+    if (!had) return;
+    try { board.releasePointerCapture(e.pointerId); } catch (_) {}
+    board.classList.remove('panning');
+    const it = state.interaction;
+    if (state.pointers.size === 1 && it && (it.kind === 'pinchView' || it.kind === 'itemGesture')) {
+      state.interaction = null; state.gestureLock = true; return;
+    }
+    if (state.pointers.size > 0) return;
+    state.gestureLock = false;
+    if (!it) { state.preview = null; state.activeSnap = null; scheduleRender(); return; }
+
+    if (it.kind === 'drawWall') {
+      const pv = state.preview;
+      if (pv) {
+        const len = Math.hypot(pv.end.x - pv.start.x, pv.end.y - pv.start.y);
+        if (len >= .15) {
+          pushHistory();
+          state.items.push({ id:uid('wall'), type:'wall', x1:pv.start.x, y1:pv.start.y, x2:pv.end.x, y2:pv.end.y, thickness:.18 });
+          toast(`Wall added · ${fmt(len)} m`);
+        }
+      }
+    } else if (it.kind === 'drawRoom') {
+      const pv = state.preview;
+      if (pv && Math.abs(pv.end.x - pv.start.x) > .25 && Math.abs(pv.end.y - pv.start.y) > .25) {
+        pushHistory();
+        const room = createRoomFromPreview(pv.start, pv.end);
+        state.items.push(room);
+        state.selection = room.id; state.tool = 'select';
+        syncToolButtons(); buildInspector(); updateToolHint();
+        toast(`Room added · ${fmt(roomArea(room))} m²`);
+      }
+    } else if (it.kind === 'drawObject') {
+      if (state.preview) {
+        pushHistory();
+        const obj = createObjectFromPreview(state.preview.start, state.preview.end);
+        state.items.push(obj);
+        state.selection = obj.id; state.tool = 'select';
+        syncToolButtons(); buildInspector(); updateToolHint();
+        toast('Object placed');
+      }
+    } else if (it.kind === 'placeOpening') {
+      const geo = openingGeometry(it.op);
+      if (geo && geo.len > 0) {
+        pushHistory();
+        state.items.push(it.op);
+        state.selection = it.op.id; state.tool = 'select';
+        syncToolButtons(); buildInspector(); updateToolHint();
+        toast(`${it.op.type === 'door' ? 'Door' : 'Window'} snapped to wall`);
+      }
+    } else if (it.kind === 'panView' && !it.moved && state.tool === 'select') {
+      state.selection = null; buildInspector();
+    }
+    state.interaction = null; state.preview = null; state.activeSnap = null;
+    render();
+  }
+
+  function onPointerCancel(e){
+    state.pointers.delete(e.pointerId);
+    if (state.pointers.size === 0) {
+      state.interaction = null; state.preview = null; state.activeSnap = null; state.gestureLock = false;
+      scheduleRender();
+    }
+  }
+
+  board.addEventListener('pointerdown', onPointerDown, { passive:false });
+  board.addEventListener('pointermove', onPointerMove, { passive:false });
+  board.addEventListener('pointerup', onPointerUp);
+  board.addEventListener('pointercancel', onPointerCancel);
+  board.addEventListener('contextmenu', e => e.preventDefault());
+  board.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoomAt(screenPoint(e), Math.exp(-e.deltaY * .0014));
+  }, { passive:false });
+
+  /* create helpers */
+  function createRoomFromPreview(start, end){
+    const count = state.items.filter(i => i.type === 'room').length + 1;
+    return {
+      id:uid('room'), type:'room', label:`ROOM ${count}`,
+      x:Math.round(Math.min(start.x, end.x) * 100) / 100,
+      y:Math.round(Math.min(start.y, end.y) * 100) / 100,
+      w:Math.round(Math.max(.4, Math.abs(end.x - start.x)) * 100) / 100,
+      h:Math.round(Math.max(.4, Math.abs(end.y - start.y)) * 100) / 100,
+      rot:0, color:COLORS.rooms[(count - 1) % COLORS.rooms.length]
+    };
+  }
+  function createObjectFromPreview(start, end){
+    let x = Math.min(start.x, end.x), y = Math.min(start.y, end.y);
+    let w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y);
+    if (w < .2 || h < .2) { x = start.x; y = start.y; w = 1.2; h = .8; }
+    const count = state.items.filter(i => i.type === 'object').length + 1;
+    return {
+      id:uid('obj'), type:'object', shape:state.shapeKind, label:`OBJECT ${count}`,
+      x:Math.round(x * 100) / 100, y:Math.round(y * 100) / 100,
+      w:Math.round(Math.max(.3, w) * 100) / 100, h:Math.round(Math.max(.3, h) * 100) / 100,
+      rot:0, color:COLORS.rooms[(count + 2) % COLORS.rooms.length]
+    };
+  }
+  function getNearestWall(point, maxDistance = .9){
+    let best = null;
+    for (const wall of state.items) {
+      if (wall.type !== 'wall') continue;
+      const p = pointToSegment(point, { x:wall.x1, y:wall.y1 }, { x:wall.x2, y:wall.y2 });
+      if (p.dist <= maxDistance && (!best || p.dist < best.dist)) best = { wall, ...p };
+    }
+    return best;
+  }
+
+  /* view */
+  function zoomAt(screen, factor){
+    const scale = clamp(state.view.scale * factor, 7, 260), world = toWorld(screen);
+    state.view.scale = scale;
+    state.view.tx = screen.x - world.x * scale;
+    state.view.ty = screen.y - world.y * scale;
+    scheduleRender();
+  }
+  function zoomCenter(factor){ zoomAt({ x:W / 2, y:H / 2 }, factor); }
+  function getContentBounds(){
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const item of state.items) {
+      if (item.type === 'wall') {
+        x0 = Math.min(x0, item.x1, item.x2); x1 = Math.max(x1, item.x1, item.x2);
+        y0 = Math.min(y0, item.y1, item.y2); y1 = Math.max(y1, item.y1, item.y2);
+      } else if (item.type === 'room' || item.type === 'object') {
+        for (const p of rotatedCorners(item)) {
+          x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
+        }
+      } else {
+        const geo = openingGeometry(item);
+        if (geo) {
+          x0 = Math.min(x0, geo.a.x, geo.b.x); x1 = Math.max(x1, geo.a.x, geo.b.x);
+          y0 = Math.min(y0, geo.a.y, geo.b.y); y1 = Math.max(y1, geo.a.y, geo.b.y);
+        }
+      }
+    }
+    if (!Number.isFinite(x0)) return { x0:-6, y0:-4, x1:6, y1:4, w:12, h:8 };
+    return { x0, y0, x1, y1, w:x1 - x0, h:y1 - y0 };
+  }
+  function fitPlan(){
+    if (!W || !H) return;
+    const b = getContentBounds();
+    const availW = Math.max(100, W - 54), availH = Math.max(100, H - 120);
+    const s = clamp(Math.min(availW / Math.max(1, b.w), availH / Math.max(1, b.h)), 7, 180);
+    state.view.scale = s;
+    state.view.tx = W / 2 - (b.x0 + b.w / 2) * s;
+    state.view.ty = H / 2 - (b.y0 + b.h / 2) * s;
+    scheduleRender();
+  }
+
+  /* history */
+  function snapshot(){ return { items:clone(state.items), selection:state.selection }; }
+  function pushHistory(snap = null){
+    state.history.push(snap || snapshot());
+    if (state.history.length > 60) state.history.shift();
+    state.future.length = 0;
+    updateHistoryButtons();
+  }
+  function undo(){
+    if (!state.history.length) return;
+    state.future.push(snapshot());
+    const prev = state.history.pop();
+    state.items = clone(prev.items);
+    state.selection = prev.selection && getItem(prev.selection) ? prev.selection : null;
+    state.preview = null; state.activeSnap = null;
+    buildInspector(); render(); updateHistoryButtons(); toast('Undone');
+  }
+  function redo(){
+    if (!state.future.length) return;
+    state.history.push(snapshot());
+    const next = state.future.pop();
+    state.items = clone(next.items);
+    state.selection = next.selection && getItem(next.selection) ? next.selection : null;
+    state.preview = null; state.activeSnap = null;
+    buildInspector(); render(); updateHistoryButtons(); toast('Redone');
+  }
+  function updateHistoryButtons(){
+    $('#undoBtn').disabled = state.history.length === 0;
+    $('#redoBtn').disabled = state.future.length === 0;
+  }
+  /* inspector */
+  function field(label, prop, value, opts = {}){
+    const full = opts.full ? ' full' : '';
+    if (opts.select) return `<div class="field${full}"><label>${esc(label)}</label><select data-prop="${prop}">${opts.select}</select></div>`;
+    const unit = opts.unit ? `<span class="unit">${esc(opts.unit)}</span>` : '';
+    return `<div class="field${full}"><label>${esc(label)}</label><div class="input-wrap"><input class="${opts.unit ? 'with-unit' : ''}" type="${opts.type || 'number'}" inputmode="${opts.type === 'text' ? 'text' : 'decimal'}" step="${opts.step || '.05'}" data-prop="${prop}" value="${esc(value)}" ${opts.min !== undefined ? `min="${opts.min}"` : ''}>${unit}</div></div>`;
+  }
+
+  function buildInspector(){
+    const item = getItem(state.selection);
+    if (!item) {
+      const area = totalArea(), rooms = state.items.filter(i => i.type === 'room').length, walls = state.items.filter(i => i.type === 'wall').length;
+      inspector.innerHTML = `
+        <div class="insp-head"><div><div class="insp-kicker">Workspace</div><h2 class="insp-title">Project overview</h2><div class="insp-sub">Metric blueprint · 1 unit = 1 metre</div></div><button class="insp-close desktop-only" data-action="close-inspector" aria-label="Close"><svg><use href="#i-close"/></svg></button></div>
+        <div class="project-hero"><h3>NetworK1NG N1</h3><p>Precision floor planning with live metric area, magnetic snapping and touch-first controls.</p>
+          <div class="stat-row"><div class="stat"><b>${fmt(area)}</b><span>m² floor</span></div><div class="stat"><b>${rooms}</b><span>rooms</span></div><div class="stat"><b>${walls}</b><span>walls</span></div></div>
+        </div>
+        <div class="section-label">Legend</div>
+        <div class="insp-list"><div class="legend-item"><span class="swatch wall"></span>Structural wall</div><div class="legend-item"><span class="swatch room"></span>Floor area / room</div><div class="legend-item"><span class="swatch open"></span>Door &amp; window openings</div></div>
+        <div class="section-label">Quick actions</div>
+        <div class="insp-actions"><button class="btn grow" data-action="fit"><svg><use href="#i-fit"/></svg>Fit plan</button><button class="btn grow" data-action="open-export"><svg><use href="#i-export"/></svg>Export</button></div>
+        <div class="section-label desktop-only">Shortcuts</div>
+        <div class="mini-help desktop-only"><kbd>V</kbd> select · <kbd>W</kbd> wall · <kbd>R</kbd> room · <kbd>D</kbd> door · <kbd>G</kbd> grid · <kbd>F</kbd> fit · <kbd>⌫</kbd> delete</div>
+        <div class="note desktop-only"><b>Tip:</b> draw walls first, then place rooms, doors and windows. Everything snaps to metre-grid corners, wall edges and alignments.</div>
+      `;
+      inspector.classList.remove('open');
+      return;
+    }
+    inspector.classList.add('open');
+    let head = '', body = '', actions = '';
+    if (item.type === 'room') {
+      head = `<div class="insp-kicker">Space / Room</div><h2 class="insp-title">${esc(item.label || 'Room')}</h2><div class="insp-sub">Room geometry · snaps to metre grid</div>`;
+      body = `${field('Name', 'label', item.label, { type:'text', full:true })}<div class="field-grid" style="margin-top:8px">${field('X position', 'x', fmt(item.x), { unit:'m' })}${field('Y position', 'y', fmt(item.y), { unit:'m' })}${field('Width', 'w', fmt(item.w), { unit:'m', min:0 })}${field('Depth', 'h', fmt(item.h), { unit:'m', min:0 })}${field('Rotation', 'rot', fmt(item.rot, 1), { unit:'°', step:.5, full:true })}</div><div class="metric-card"><span>Room floor area</span><strong data-live="area">${fmt(roomArea(item))} <small>m²</small></strong></div>`;
+      actions = `<button class="btn grow" data-action="duplicate"><svg><use href="#i-copy"/></svg>Duplicate</button><button class="btn grow danger" data-action="delete"><svg><use href="#i-trash"/></svg>Delete</button>`;
+    } else if (item.type === 'object') {
+      const options = `<option value="rect"${item.shape === 'rect' ? ' selected' : ''}>Rectangle</option><option value="circle"${item.shape === 'circle' ? ' selected' : ''}>Circle / ellipse</option>`;
+      head = `<div class="insp-kicker">Freestanding Object</div><h2 class="insp-title">${esc(item.label || 'Object')}</h2><div class="insp-sub">Customisable plan object</div>`;
+      body = `${field('Name', 'label', item.label, { type:'text', full:true })}${field('Shape', 'shape', '', { select:options, full:true })}<div class="field-grid" style="margin-top:8px">${field('X position', 'x', fmt(item.x), { unit:'m' })}${field('Y position', 'y', fmt(item.y), { unit:'m' })}${field('Width', 'w', fmt(item.w), { unit:'m', min:0 })}${field('Height', 'h', fmt(item.h), { unit:'m', min:0 })}${field('Rotation', 'rot', fmt(item.rot, 1), { unit:'°', step:.5, full:true })}</div><div class="metric-card"><span>Footprint</span><strong data-live="area">${fmt(item.w * item.h)} <small>m²</small></strong></div>`;
+      actions = `<button class="btn grow" data-action="duplicate"><svg><use href="#i-copy"/></svg>Duplicate</button><button class="btn grow danger" data-action="delete"><svg><use href="#i-trash"/></svg>Delete</button>`;
+    } else if (item.type === 'wall') {
+      head = `<div class="insp-kicker">Structure / Wall</div><h2 class="insp-title">Wall segment</h2><div class="insp-sub">Metric length · live thickness</div>`;
+      body = `<div class="metric-card" style="margin-top:0"><span>Wall length</span><strong data-live="length">${fmt(wallLength(item))} <small>m</small></strong></div><div class="field-grid" style="margin-top:9px">${field('Start X', 'x1', fmt(item.x1), { unit:'m' })}${field('Start Y', 'y1', fmt(item.y1), { unit:'m' })}${field('End X', 'x2', fmt(item.x2), { unit:'m' })}${field('End Y', 'y2', fmt(item.y2), { unit:'m' })}${field('Thickness', 'thickness', fmt(item.thickness), { unit:'m', step:.01, min:.05, full:true })}</div><div class="note">Drag the cyan endpoint handles directly on the plan to adjust wall corners. Doors and windows stay snapped to the wall.</div>`;
+      actions = `<button class="btn grow" data-action="duplicate"><svg><use href="#i-copy"/></svg>Duplicate</button><button class="btn grow danger" data-action="delete"><svg><use href="#i-trash"/></svg>Delete</button>`;
+    } else {
+      const isDoor = item.type === 'door';
+      head = `<div class="insp-kicker">${isDoor ? 'Openings / Door' : 'Openings / Window'}</div><h2 class="insp-title">${isDoor ? 'Door' : 'Window'}</h2><div class="insp-sub">Magnetic wall snap · live width</div>`;
+      body = `<div class="field-grid">${field('Width', 'width', fmt(item.width), { unit:'m', step:.05, min:.2 })}${field('Wall position', 'tPct', fmt(item.t * 100, 1), { unit:'%', step:.5, min:0 })}</div>${isDoor ? `<div class="insp-actions"><button class="btn grow" data-action="flip"><svg><use href="#i-refresh"/></svg>Swing side</button><button class="btn grow" data-action="hinge"><svg><use href="#i-door"/></svg>Reverse hinge</button></div>` : ''}<div class="note">Drag the element along its host wall to reposition it. Drag either end handle to resize the opening.</div>`;
+      actions = `<button class="btn grow" data-action="duplicate"><svg><use href="#i-copy"/></svg>Duplicate</button><button class="btn grow danger" data-action="delete"><svg><use href="#i-trash"/></svg>Delete</button>`;
+    }
+    inspector.innerHTML = `
+      <div class="insp-head"><div>${head}</div><button class="insp-close" data-action="close-inspector" aria-label="Close inspector"><svg><use href="#i-close"/></svg></button></div>
+      ${body}
+      <div class="insp-actions">${actions}</div>
+      <button class="btn" style="width:100%;margin-top:7px" data-action="fit"><svg><use href="#i-fit"/></svg>Fit plan to view</button>
+    `;
+  }
+
+  function syncInspectorValues(){
+    const item = getItem(state.selection);
+    if (!item) return;
+    inspector.querySelectorAll('[data-prop]').forEach(input => {
+      if (document.activeElement === input) return;
+      const prop = input.getAttribute('data-prop');
+      if (prop === 'label') { input.value = item.label || ''; return; }
+      if (prop === 'shape') { input.value = item.shape || 'rect'; return; }
+      if (prop === 'tPct') { input.value = fmt(item.t * 100, 1); return; }
+      if (['x','y','w','h','rot','width','thickness','x1','y1','x2','y2'].includes(prop)) {
+        input.value = prop === 'rot' ? fmt(item[prop], 1) : fmt(item[prop], 2);
+      }
+    });
+    const live = inspector.querySelector('[data-live="area"]');
+    if (live) live.innerHTML = `${fmt(item.type === 'room' ? roomArea(item) : item.w * item.h)} <small>m²</small>`;
+    const len = inspector.querySelector('[data-live="length"]');
+    if (len && item.type === 'wall') len.innerHTML = `${fmt(wallLength(item))} <small>m</small>`;
+  }
+
+  function applyProp(prop, raw){
+    const item = getItem(state.selection);
+    if (!item) return;
+    const value = raw;
+    if (prop === 'label') item.label = String(value).trim() || (item.type === 'room' ? 'ROOM' : 'OBJECT');
+    else if (prop === 'shape') item.shape = value === 'circle' ? 'circle' : 'rect';
+    else {
+      const n = parseFloat(value);
+      if (!Number.isFinite(n)) return;
+      if (prop === 'thickness') item.thickness = clamp(n, .05, 1);
+      else if (item.type === 'room' || item.type === 'object') {
+        if (prop === 'w') item.w = Math.max(.2, n);
+        else if (prop === 'h') item.h = Math.max(.2, n);
+        else if (prop === 'rot') item.rot = ((n % 360) + 360) % 360;
+        else if (prop === 'x') item.x = n;
+        else if (prop === 'y') item.y = n;
+      } else if (item.type === 'wall') {
+        if (prop === 'x1') item.x1 = n; else if (prop === 'y1') item.y1 = n;
+        else if (prop === 'x2') item.x2 = n; else if (prop === 'y2') item.y2 = n;
+        if (wallLength(item) < .1) toast('Wall is too short');
+      } else if (item.type === 'door' || item.type === 'window') {
+        const geo = openingGeometry(item);
+        if (prop === 'width' && geo) {
+          item.width = clamp(n, .2, geo.len - .05);
+          const frac = item.width / geo.len;
+          item.t = clamp(item.t, frac / 2, 1 - frac / 2);
+        } else if (prop === 'tPct' && geo) {
+          const frac = item.width / geo.len;
+          item.t = clamp(n / 100, frac / 2, 1 - frac / 2);
+        }
+      }
+    }
+    render();
+    if (prop === 'label' || prop === 'shape') buildInspector();
+    else syncInspectorValues();
+  }
+
+  inspector.addEventListener('focusin', e => {
+    if (e.target.matches('[data-prop]') && !state.editSnapshot) state.editSnapshot = snapshot();
+  });
+  inspector.addEventListener('input', e => {
+    if (e.target.getAttribute('data-prop') === 'label') {
+      const item = getItem(state.selection);
+      if (item) { item.label = e.target.value; scheduleRender(); }
+    }
+  });
+  inspector.addEventListener('change', e => {
+    const input = e.target.closest('[data-prop]');
+    if (!input) return;
+    if (state.editSnapshot) { pushHistory(state.editSnapshot); state.editSnapshot = null; }
+    applyProp(input.getAttribute('data-prop'), input.value);
+  });
+  inspector.addEventListener('focusout', e => {
+    if (e.target.matches('[data-prop]')) setTimeout(() => { if (!inspector.contains(document.activeElement)) state.editSnapshot = null; }, 0);
+  });
+  inspector.addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action'), item = getItem(state.selection);
+    if (action === 'close-inspector') { state.selection = null; buildInspector(); render(); }
+    else if (action === 'fit') fitPlan();
+    else if (action === 'open-export') openProjectModal();
+    else if (action === 'delete') deleteSelection();
+    else if (action === 'duplicate') duplicateSelection();
+    else if (action === 'flip' && item) { pushHistory(); item.swing *= -1; render(); }
+    else if (action === 'hinge' && item && item.type === 'door') { pushHistory(); item.hinge = item.hinge ? 0 : 1; render(); toast('Door hinge reversed'); }
+  });
+
+  function deleteSelection(){
+    const id = state.selection, item = getItem(id);
+    if (!item) return;
+    pushHistory();
+    state.items = state.items.filter(i => i.id !== id);
+    if (item.type === 'wall') state.items = state.items.filter(i => !((i.type === 'door' || i.type === 'window') && i.wallId === id));
+    state.selection = null;
+    buildInspector(); render(); toast('Element deleted');
+  }
+  function duplicateSelection(){
+    const item = getItem(state.selection);
+    if (!item) return;
+    pushHistory();
+    const copy = clone(item);
+    copy.id = uid(item.type);
+    if (copy.type === 'wall') { copy.x1 += .35; copy.x2 += .35; copy.y1 += .35; copy.y2 += .35; }
+    else if (copy.type === 'room' || copy.type === 'object') { copy.x += .35; copy.y += .35; }
+    else if (copy.type === 'door' || copy.type === 'window') {
+      const geo = openingGeometry(copy);
+      if (geo) copy.t = clamp(copy.t + .07, copy.width / 2 / geo.len, 1 - copy.width / 2 / geo.len);
+    }
+    state.items.push(copy);
+    state.selection = copy.id;
+    buildInspector(); render(); toast('Duplicated');
+  }
+
+  /* UI state */
+  function updateMetrics(){
+    const area = totalArea();
+    $('#areaValue').textContent = fmt(area);
+    const ma = $('#modalArea'); if (ma) ma.textContent = fmt(area);
+    const mr = $('#modalRooms'); if (mr) mr.textContent = state.items.filter(i => i.type === 'room').length;
+    const mw = $('#modalWalls'); if (mw) mw.textContent = state.items.filter(i => i.type === 'wall').length;
+    const candidates = [.1, .2, .5, 1, 2, 5, 10, 20, 50, 100];
+    let meters = candidates[candidates.length - 1];
+    for (const m of candidates) if (m * state.view.scale >= 60) { meters = m; break; }
+    const px = Math.max(22, Math.min(140, meters * state.view.scale));
+    const bar = $('#scaleBar'), label = $('#scaleLabel');
+    if (bar) bar.style.width = px + 'px';
+    if (label) label.textContent = `${fmtShort(meters)} m`;
+  }
+  function toast(message){
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toastEl.classList.remove('show'), 2100);
+  }
+  function syncToolButtons(){
+    $$('.tool').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-tool') === state.tool));
+    board.classList.toggle('tool-select', state.tool === 'select');
+    board.classList.toggle('tool-hand', state.tool === 'hand');
+  }
+  const HINTS = {
+    select:'Tap an element to edit · drag empty canvas to pan · pinch to zoom',
+    wall:'Drag to draw a wall · live length in metres',
+    room:'Drag to create a room · snapped to grid',
+    object:'Drag to place an object · edit shape in panel',
+    door:'Tap a wall to place a door · snaps automatically',
+    window:'Tap a wall to place a window · snaps automatically',
+    hand:'Drag to pan · pinch to zoom'
+  };
+  function updateToolHint(){ $('#canvasHint').textContent = HINTS[state.tool] || HINTS.select; }
+  function setTool(tool){
+    state.tool = tool === 'pan' ? 'hand' : tool;
+    state.preview = null; state.activeSnap = null;
+    if (state.tool !== 'select') { state.selection = null; buildInspector(); }
+    syncToolButtons(); updateToolHint(); render();
+  }
+  $$('.tool').forEach(btn => btn.addEventListener('click', () => setTool(btn.getAttribute('data-tool'))));
+  $('#gridBtn').addEventListener('click', () => { state.showGrid = !state.showGrid; $('#gridBtn').classList.toggle('active', state.showGrid); render(); });
+  $('#dimsBtn').addEventListener('click', () => { state.showDims = !state.showDims; $('#dimsBtn').classList.toggle('active', state.showDims); render(); });
+  $('#snapBtn').addEventListener('click', () => { state.snap = !state.snap; $('#snapBtn').classList.toggle('active', state.snap); toast(state.snap ? 'Smart snapping on' : 'Snapping off'); });
+  $('#zoomInBtn').addEventListener('click', () => zoomCenter(1.22));
+  $('#zoomOutBtn').addEventListener('click', () => zoomCenter(1 / 1.22));
+  $('#fitBtn').addEventListener('click', fitPlan);
+  $('#undoBtn').addEventListener('click', undo);
+  $('#redoBtn').addEventListener('click', redo);
+  /* export */
+  const EXPORT_CSS = `
+    .grid-minor{stroke:rgba(94,196,232,.09);stroke-width:1;fill:none;vector-effect:non-scaling-stroke}
+    .grid-major{stroke:rgba(103,232,255,.17);stroke-width:1;fill:none;vector-effect:non-scaling-stroke}
+    .grid-axis{stroke:rgba(103,232,255,.34);stroke-width:1.2;fill:none;vector-effect:non-scaling-stroke}
+    .grid-label{fill:rgba(130,202,226,.65);font-family:ui-monospace,monospace;letter-spacing:.04em}
+    .wall-glow{stroke:rgba(75,218,249,.13);fill:none;stroke-linecap:square}
+    .wall-core{stroke:#e6fbff;fill:none;stroke-linecap:square}
+    .room-stroke{fill:none;stroke-width:1.2;opacity:.52;vector-effect:non-scaling-stroke}
+    .room-label{fill:#dcf9ff;font-family:ui-sans-serif,sans-serif;font-weight:700;text-anchor:middle;dominant-baseline:middle;letter-spacing:.09em}
+    .room-area{fill:#66dff8;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle}
+    .object-stroke{fill:none;stroke:#75e0f5;stroke-width:1.4;opacity:.75;vector-effect:non-scaling-stroke}
+    .object-label{fill:#a8eafa;font-family:ui-sans-serif,sans-serif;font-weight:600;text-anchor:middle;dominant-baseline:middle;letter-spacing:.08em}
+    .open-gap{fill:none;stroke-linecap:butt}.open-ink{stroke:#7eeaff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+    .open-arc{stroke:rgba(126,234,255,.64);fill:none;stroke-width:1.15;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+    .measure-pill{fill:rgba(3,17,32,.9);stroke:rgba(103,232,255,.24);stroke-width:1;vector-effect:non-scaling-stroke}
+    .measure-text{fill:#a9eafa;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle;letter-spacing:.03em}
+    .measure-text.strong{fill:#e4fbff}
+  `;
+
+  function buildExportDocument(){
+    const b = getContentBounds(), pad = 1;
+    const innerW = Math.max(2, b.w + pad * 2), innerH = Math.max(2, b.h + pad * 2);
+    let scale = Math.min(115, 1900 / innerW, 1250 / innerH);
+    scale = Math.max(28, scale);
+    const planW = innerW * scale, planH = innerH * scale;
+    const outW = Math.max(860, Math.round(planW + 48));
+    const headerH = 78, footerH = 94;
+    const outH = Math.round(planH + headerH + footerH + 28);
+    const tx = (outW - planW) / 2;
+    const ty = headerH + 10;
+    const root = svg('svg', { xmlns:NS, width:outW, height:outH, viewBox:`0 0 ${outW} ${outH}` });
+    const defs = svg('defs');
+    const grad = svg('radialGradient', { id:'exportBg', cx:'30%', cy:'15%', r:'90%' });
+    grad.appendChild(svg('stop', { offset:'0%', 'stop-color':'#0a2d4e' }));
+    grad.appendChild(svg('stop', { offset:'56%', 'stop-color':'#061b33' }));
+    grad.appendChild(svg('stop', { offset:'100%', 'stop-color':'#04152a' }));
+    defs.appendChild(grad);
+    root.appendChild(defs);
+    const style = svg('style'); style.textContent = EXPORT_CSS; root.appendChild(style);
+    root.appendChild(svg('rect', { x:0, y:0, width:outW, height:outH, fill:'url(#exportBg)' }));
+    root.appendChild(svg('rect', { x:8, y:8, width:outW - 16, height:outH - 16, rx:3, fill:'none', stroke:'rgba(103,232,255,.24)', 'stroke-width':1 }));
+    root.appendChild(svg('rect', { x:16, y:16, width:outW - 32, height:outH - 32, fill:'none', stroke:'rgba(103,232,255,.07)', 'stroke-width':1 }));
+
+    const world = svg('g', { transform:`translate(${tx + pad * scale - b.x0 * scale} ${ty + pad * scale - b.y0 * scale}) scale(${scale})` });
+    const saved = { grid:state.showGrid, dims:state.showDims, selection:state.selection };
+    state.showGrid = true; state.showDims = true; state.selection = null;
+    const eb = { x0:b.x0 - pad, y0:b.y0 - pad, x1:b.x1 + pad, y1:b.y1 + pad };
+    world.appendChild(buildGrid(scale, eb, true));
+    for (const item of state.items) if (item.type === 'room') world.appendChild(buildRoom(item, scale));
+    for (const item of state.items) if (item.type === 'object') world.appendChild(buildObject(item, scale));
+    for (const item of state.items) if (item.type === 'wall') world.appendChild(buildWall(item, scale));
+    state.showDims = false;
+    for (const item of state.items) if (item.type === 'door' || item.type === 'window') {
+      const el = buildOpening(item, scale);
+      if (el) world.appendChild(el);
+    }
+    state.showGrid = saved.grid; state.showDims = saved.dims; state.selection = saved.selection;
+    root.appendChild(world);
+
+    const watermark = svg('text', {
+      x:outW / 2, y:ty + planH / 2, fill:'rgba(103,232,255,.045)',
+      'font-family':'ui-sans-serif,sans-serif', 'font-size':'74', 'font-weight':'800',
+      'text-anchor':'middle', 'letter-spacing':'14', transform:`rotate(-16 ${outW / 2} ${ty + planH / 2})`
+    }, ['NETWORK1NG']);
+    root.appendChild(watermark);
+
+    const header = svg('g');
+    header.appendChild(svg('rect', { x:20, y:21, width:38, height:38, rx:10, fill:'rgba(103,232,255,.1)', stroke:'rgba(103,232,255,.55)' }));
+    header.appendChild(svg('rect', { x:24, y:25, width:30, height:30, rx:6, fill:'none', stroke:'rgba(103,232,255,.18)' }));
+    addText(header, 'N1', 39, 41, { fill:'#67e8ff', 'font-family':'ui-sans-serif,sans-serif', 'font-size':'13', 'font-weight':'800', 'text-anchor':'middle', 'dominant-baseline':'middle', 'letter-spacing':'-1' });
+    addText(header, 'NETWORK1NG BLUEPRINT STUDIO', 70, 34, { fill:'#e6fbff', 'font-family':'ui-sans-serif,sans-serif', 'font-size':'14', 'font-weight':'700', 'letter-spacing':'3' });
+    addText(header, 'METRIC FLOOR PLAN · 1 UNIT = 1 METRE', 70, 51, { fill:'#6e9ab3', 'font-family':'ui-monospace,monospace', 'font-size':'8', 'letter-spacing':'2' });
+    addText(header, 'N1 · ARCHITECTURAL SERIES', outW - 32, 35, { fill:'#67e8ff', 'font-family':'ui-monospace,monospace', 'font-size':'8', 'text-anchor':'end', 'letter-spacing':'1.5' });
+    addText(header, new Date().toLocaleDateString(undefined, { year:'numeric', month:'short', day:'2-digit' }).toUpperCase(), outW - 32, 50, { fill:'#6e9ab3', 'font-family':'ui-monospace,monospace', 'font-size':'8', 'text-anchor':'end', 'letter-spacing':'1.2' });
+    header.appendChild(svg('line', { x1:20, y1:70, x2:outW - 20, y2:70, stroke:'rgba(103,232,255,.2)', 'stroke-width':1 }));
+    root.appendChild(header);
+
+    const footerY = outH - footerH + 16;
+    root.appendChild(svg('line', { x1:20, y1:footerY, x2:outW - 20, y2:footerY, stroke:'rgba(103,232,255,.2)', 'stroke-width':1 }));
+    addText(root, 'TOTAL FLOOR AREA', 26, footerY + 22, { fill:'#6e9ab3', 'font-family':'ui-monospace,monospace', 'font-size':'7.5', 'letter-spacing':'1.5' });
+    addText(root, `${fmt(totalArea())} m²`, 26, footerY + 42, { fill:'#67e8ff', 'font-family':'ui-monospace,monospace', 'font-size':'18', 'font-weight':'600' });
+    addText(root, 'ROOMS', 210, footerY + 22, { fill:'#6e9ab3', 'font-family':'ui-monospace,monospace', 'font-size':'7.5', 'letter-spacing':'1.5' });
+    addText(root, String(state.items.filter(i => i.type === 'room').length), 210, footerY + 42, { fill:'#e6fbff', 'font-family':'ui-monospace,monospace', 'font-size':'15' });
+    addText(root, 'WALLS', 286, footerY + 22, { fill:'#6e9ab3', 'font-family':'ui-monospace,monospace', 'font-size':'7.5', 'letter-spacing':'1.5' });
+    addText(root, String(state.items.filter(i => i.type === 'wall').length), 286, footerY + 42, { fill:'#e6fbff', 'font-family':'ui-monospace,monospace', 'font-size':'15' });
+    addText(root, 'GRAPHIC SCALE', outW - 250, footerY + 22, { fill:'#6e9ab3', 'font-family':'ui-monospace,monospace', 'font-size':'7.5', 'letter-spacing':'1.5' });
+    const sbW = Math.min(150, 2 * scale);
+    root.appendChild(svg('line', { x1:outW - 250, y1:footerY + 40, x2:outW - 250 + sbW, y2:footerY + 40, stroke:'#67e8ff', 'stroke-width':1 }));
+    root.appendChild(svg('line', { x1:outW - 250, y1:footerY + 35, x2:outW - 250, y2:footerY + 45, stroke:'#67e8ff', 'stroke-width':1 }));
+    root.appendChild(svg('line', { x1:outW - 250 + sbW, y1:footerY + 35, x2:outW - 250 + sbW, y2:footerY + 45, stroke:'#67e8ff', 'stroke-width':1 }));
+    addText(root, `${fmtShort(sbW / scale)} m`, outW - 250 + sbW / 2, footerY + 54, { fill:'#a9eafa', 'font-family':'ui-monospace,monospace', 'font-size':'8', 'text-anchor':'middle' });
+    addText(root, 'MADE BY NETWORK1NG', outW - 26, footerY + 51, { fill:'#67e8ff', 'font-family':'ui-sans-serif,sans-serif', 'font-size':'10', 'font-weight':'700', 'text-anchor':'end', 'letter-spacing':'2' });
+    addText(root, 'PRECISION SPACE PLANNING / N1', outW - 26, footerY + 65, { fill:'#527b93', 'font-family':'ui-monospace,monospace', 'font-size':'7', 'text-anchor':'end', 'letter-spacing':'1.4' });
+    return { source:'<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(root), width:outW, height:outH, scale };
+  }
+
+  function downloadBlob(blob, filename){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  }
+  function exportSvg(){
+    const doc = buildExportDocument();
+    downloadBlob(new Blob([doc.source], { type:'image/svg+xml;charset=utf-8' }), `network1ng-blueprint-${Date.now()}.svg`);
+    toast('SVG exported with title block');
+  }
+  function exportPng(){
+    const doc = buildExportDocument();
+    const blob = new Blob([doc.source], { type:'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = doc.width; canvas.height = doc.height;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#04152a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, doc.width, doc.height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(png => {
+        if (png) {
+          downloadBlob(png, `network1ng-blueprint-${Date.now()}.png`);
+          toast('PNG exported with title block');
+        }
+      }, 'image/png');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); toast('PNG export failed'); };
+    img.src = url;
+  }
+
+  /* modal & project actions */
+  function openProjectModal(){
+    updateMetrics();
+    modal.classList.add('open');
+  }
+  function closeProjectModal(){ modal.classList.remove('open'); }
+  function loadDemo(){
+    pushHistory();
+    state.items = demoPlan();
+    state.selection = null;
+    buildInspector(); fitPlan(); render(); updateHistoryButtons(); closeProjectModal(); toast('Demo plan loaded');
+  }
+  function newPlan(){
+    if (!window.confirm('Clear the plan and start fresh?')) return;
+    pushHistory();
+    state.items = []; state.selection = null;
+    buildInspector(); fitPlan(); render(); updateHistoryButtons(); closeProjectModal(); toast('New blank plan');
+  }
+  $('#exportBtn').addEventListener('click', openProjectModal);
+  $$('[data-close-modal]').forEach(el => el.addEventListener('click', closeProjectModal));
+  $('#exportPng').addEventListener('click', exportPng);
+  $('#exportSvg').addEventListener('click', exportSvg);
+  $('#loadDemoBtn').addEventListener('click', loadDemo);
+  $('#newPlanBtn').addEventListener('click', newPlan);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (modal.classList.contains('open')) { closeProjectModal(); return; }
+      state.interaction = null; state.preview = null; state.activeSnap = null;
+      state.selection = null; buildInspector(); render();
+      return;
+    }
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+    const key = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && key === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+    if ((e.ctrlKey || e.metaKey) && key === 'y') { e.preventDefault(); redo(); return; }
+    if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelection(); return; }
+    if (key === 'v') setTool('select');
+    else if (key === 'w') setTool('wall');
+    else if (key === 'r') setTool('room');
+    else if (key === 'o') setTool('object');
+    else if (key === 'd') setTool('door');
+    else if (key === 'n') setTool('window');
+    else if (key === 'h') setTool('hand');
+    else if (key === 'g') { state.showGrid = !state.showGrid; $('#gridBtn').classList.toggle('active', state.showGrid); render(); }
+    else if (key === 'm') { state.showDims = !state.showDims; $('#dimsBtn').classList.toggle('active', state.showDims); render(); }
+    else if (key === 'f') fitPlan();
+  });
+
+  /* layout & boot */
+  function resizeBoard(){
+    const rect = canvasWrap.getBoundingClientRect();
+    const nw = Math.max(1, Math.floor(rect.width)), nh = Math.max(1, Math.floor(rect.height));
+    if (Math.abs(nw - W) < 1 && Math.abs(nh - H) < 1 && state.initialized) return;
+    W = nw; H = nh;
+    board.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    if (!state.initialized) {
+      state.initialized = true;
+      fitPlan();
+      buildInspector();
+      syncToolButtons();
+      updateToolHint();
+      updateHistoryButtons();
+      render();
+    } else {
+      scheduleRender();
+    }
+  }
+
+  state.items = demoPlan();
+  buildInspector();
+  syncToolButtons();
+  updateToolHint();
+  updateHistoryButtons();
+  if ('ResizeObserver' in window) new ResizeObserver(resizeBoard).observe(canvasWrap);
+  window.addEventListener('resize', resizeBoard);
+  resizeBoard();
+})();
+</script>
+</body>
+</html>
