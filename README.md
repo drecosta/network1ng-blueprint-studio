@@ -12,6 +12,7 @@ Open the live site on your phone, then choose **Install app** in the Export pane
 
 ## Features
 
+- Dedicated Move tool for dragging items without opening the inspector
 - Pan, zoom, pinch, drag, resize, and rotate
 - Walls, rooms, doors, windows, and furniture objects
 - Exact wall length and thickness editing with Apply/Cancel
