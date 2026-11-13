@@ -85,6 +85,19 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .insp-close{margin-left:auto;width:32px;height:32px;flex:0 0 32px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--muted);display:grid;place-items:center}
 .insp-close:hover{color:var(--white);background:rgba(255,255,255,.05)}
 .insp-close svg{width:15px;height:15px}
+.insp-collapse{display:none;width:32px;height:32px;flex:0 0 32px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--muted);place-items:center}
+.insp-collapse svg{width:16px;height:16px;transition:transform .18s}
+.rot-controls{margin-top:10px;padding:10px;border:1px solid rgba(120,225,255,.14);border-radius:12px;background:rgba(3,16,31,.34)}
+.rot-line{display:flex;align-items:center;gap:9px}
+.rot-caption{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.rot-slider{flex:1;min-width:0;height:25px;accent-color:var(--cyan);background:transparent;cursor:pointer}
+.rot-value{min-width:39px;text-align:right;font-family:ui-monospace,monospace;font-size:10px;color:var(--cyan)}
+.rot-actions,.flip-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px}
+.flip-row{grid-template-columns:1fr 1fr}
+.mini-btn{height:34px;border-radius:9px;border:1px solid rgba(120,225,255,.16);background:rgba(103,232,255,.045);color:var(--muted);font-family:ui-monospace,monospace;font-size:9px;letter-spacing:.02em}
+.mini-btn:hover,.mini-btn:active{color:var(--cyan);border-color:rgba(103,232,255,.32);background:rgba(103,232,255,.1)}
+.mini-btn[aria-pressed="true"]{color:var(--cyan);border-color:rgba(103,232,255,.36);background:rgba(103,232,255,.13)}
+.object-orient{stroke:#9cecff;stroke-width:1;vector-effect:non-scaling-stroke;opacity:.42;pointer-events:none}
 .section-label{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2);margin:17px 0 7px}
 .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .field{display:flex;flex-direction:column;gap:4px;min-width:0}.field.full{grid-column:1/-1}
@@ -149,6 +162,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .modal-stat{border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center;background:rgba(3,16,31,.28)}
 .modal-stat b{display:block;color:var(--cyan);font-family:ui-monospace,monospace;font-size:14px}
 .modal-stat span{display:block;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-top:2px}
+.save-status{display:flex;align-items:center;gap:7px;margin:-5px 0 13px;min-height:16px;font-family:ui-monospace,monospace;font-size:8px;letter-spacing:.04em;color:var(--muted)}
+.save-status::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green,#74f0b0);box-shadow:0 0 8px rgba(116,240,176,.55)}
+.save-status.saving::before{background:var(--cyan);box-shadow:0 0 8px rgba(103,232,255,.65)}
+.save-status.error{color:#ffb3b3}.save-status.error::before{background:var(--red,#ff6b6b);box-shadow:none}
 .export-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .export-option{border:1px solid var(--line);border-radius:13px;padding:13px 12px;background:rgba(3,16,31,.35);color:var(--white);text-align:left;transition:.15s;display:flex;flex-direction:column;gap:7px}
 .export-option:hover{border-color:rgba(103,232,255,.42);background:rgba(103,232,255,.07);transform:translateY(-1px)}
@@ -193,9 +210,17 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .preview-dot{fill:#c8f9ff;pointer-events:none}
 @keyframes sheetUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @media(max-width:900px){
-  .inspector{position:absolute;left:8px;right:8px;bottom:8px;width:auto;flex-basis:auto;max-height:58dvh;border:1px solid rgba(103,232,255,.25);border-radius:18px;display:none;z-index:30;padding:12px 13px;box-shadow:0 24px 70px rgba(0,0,0,.58);background:linear-gradient(170deg,rgba(9,39,68,.97),rgba(4,21,40,.985));-webkit-overflow-scrolling:touch}
+  .inspector{position:absolute;left:8px;right:8px;bottom:calc(8px + var(--safe));width:auto;flex-basis:auto;max-height:58dvh;border:1px solid rgba(103,232,255,.25);border-radius:18px;display:none;z-index:30;padding:12px 13px;box-shadow:0 24px 70px rgba(0,0,0,.58);background:linear-gradient(170deg,rgba(9,39,68,.97),rgba(4,21,40,.985));-webkit-overflow-scrolling:touch}
   .inspector.open{display:block;animation:sheetUp .2s}
   .inspector .desktop-only{display:none}
+  .insp-collapse{display:grid;margin-left:auto}
+  .insp-close{margin-left:0}
+  .inspector.sheet-collapsed{left:auto;right:6px;bottom:calc(6px + var(--safe));width:auto;max-width:calc(100% - 12px);max-height:none;padding:8px 10px;overflow:hidden;border-radius:14px;animation:none}
+  .inspector.sheet-collapsed>.insp-head{margin:0;align-items:center;gap:7px}
+  .inspector.sheet-collapsed .insp-kicker,.inspector.sheet-collapsed .insp-sub{display:none}
+  .inspector.sheet-collapsed .insp-title{font-size:12px;white-space:nowrap}
+  .inspector.sheet-collapsed .insp-collapse svg{transform:rotate(180deg)}
+  .inspector.sheet-collapsed .insp-collapse,.inspector.sheet-collapsed .insp-close{width:30px;height:30px;flex-basis:30px}
   .canvas-hint{bottom:11px;max-width:calc(100% - 190px);left:52%}
 }
 @media(max-width:620px){
@@ -209,7 +234,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   .canvas-hint{bottom:10px;left:50%;max-width:calc(100% - 156px);font-size:8px;padding:5px 9px;white-space:nowrap}
   .scale-readout{left:10px;bottom:10px;font-size:7.5px;gap:5px}.canvas-watermark{right:10px;bottom:9px}.canvas-watermark b{font-size:6.5px}.canvas-watermark span{display:none}
   .toolbar{height:calc(64px + var(--safe));padding:4px max(4px,env(safe-area-inset-right)) var(--safe) max(4px,env(safe-area-inset-left));gap:0}.tool{border-radius:10px;gap:3px}.tool svg{width:20px;height:20px}.tool span{font-size:7px;letter-spacing:.02em}
-  .inspector{max-height:60dvh;left:6px;right:6px;bottom:6px;padding:12px 12px 14px}.insp-title{font-size:14px}.field input,.field select{height:44px;font-size:16px}.btn{height:42px}
+  .inspector{max-height:60dvh;left:6px;right:6px;bottom:calc(6px + var(--safe));padding:12px 12px 14px}.insp-title{font-size:14px}.field input,.field select{height:44px;font-size:16px}.btn{height:42px}
+  .mini-btn{height:40px;font-size:10px}.rot-slider{height:32px}
   .modal{padding:12px}.modal-card{padding:15px;border-radius:16px;max-height:92dvh}.modal-close{width:38px;height:38px}.empty-card{padding:16px 14px 14px}.empty-actions .btn{height:42px}
   .empty-state{padding:14px}
 }
@@ -245,6 +271,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <symbol id="i-vector" viewBox="0 0 24 24"><path d="M5 19L19 5M5 5h14v14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="5" cy="19" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="19" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
 <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 6M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3z" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="M7 9.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs></svg>
 
 <div class="app">
@@ -304,11 +331,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<div class="modal" id="projectModal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+<div class="modal" id="projectModal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle" aria-hidden="true">
   <div class="modal-backdrop" data-close-modal></div>
   <div class="modal-card">
     <div class="modal-head"><div class="brand-mark" aria-hidden="true">N1</div><div><h2 class="modal-title" id="projectModalTitle">Blueprint Studio</h2><div class="modal-sub">Project &amp; export · Made by NetworK1NG</div></div><button class="modal-close" data-close-modal aria-label="Close"><svg><use href="#i-close"/></svg></button></div>
     <div class="modal-stats"><div class="modal-stat"><b id="modalArea">0.00</b><span>Floor m²</span></div><div class="modal-stat"><b id="modalRooms">0</b><span>Rooms</span></div><div class="modal-stat"><b id="modalWalls">0</b><span>Walls</span></div></div>
+    <div class="save-status" id="saveStatus" aria-live="polite">Saved on this device</div>
     <div class="section-label" style="margin-top:0">Export plan</div>
     <div class="export-grid">
       <button class="export-option" id="exportPng"><svg><use href="#i-image"/></svg><b>PNG image</b><span>High-resolution raster with title block &amp; watermark.</span></button>
@@ -326,6 +354,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const round3 = v => Math.round(v * 1000) / 1000;
+  const ENDPOINT_EPS = .01;
+  const SAVE_KEY = 'network1ng-blueprint:v1';
   const rad = d => d * Math.PI / 180;
   const deg = r => r * 180 / Math.PI;
   const fmt = (v, n = 2) => (Number.isFinite(v) ? v : 0).toFixed(n);
@@ -529,7 +560,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     g.appendChild(inner);
     const pixelMin = Math.min(room.w, room.h) * scale;
     if (pixelMin > 26) {
-      addText(g, room.label || 'ROOM', c.x, c.y - 4 / scale, { class:'room-label', style:`font-size:${clamp(10.5, 7, 13) / scale}px` });
+      addText(g, room.label || 'ROOM', c.x, c.y - 4 / scale, { class:'room-label', style:`font-size:${10.5 / scale}px` });
       if (pixelMin > 55) addText(g, `${fmt(roomArea(room))} m²`, c.x, c.y + 11 / scale, { class:'room-area', style:`font-size:${8 / scale}px`, opacity:.9 });
     }
     return g;
@@ -538,7 +569,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function buildObject(obj, scale){
     const g = svg('g', { class:'item object', 'data-id':obj.id });
     const c = getCenter(obj);
-    const inner = svg('g', { transform:obj.rot ? `rotate(${obj.rot} ${c.x} ${c.y})` : '' });
+    const transforms = [];
+    if (obj.rot) transforms.push(`rotate(${obj.rot} ${c.x} ${c.y})`);
+    if (obj.flipX || obj.flipY) transforms.push(`translate(${c.x} ${c.y}) scale(${obj.flipX ? -1 : 1} ${obj.flipY ? -1 : 1}) translate(${-c.x} ${-c.y})`);
+    const inner = svg('g', { transform:transforms.join(' ') });
     if (obj.shape === 'circle') {
       inner.appendChild(svg('ellipse', { cx:c.x, cy:c.y, rx:obj.w / 2, ry:obj.h / 2, fill:obj.color, 'fill-opacity':.14, class:'object-fill' }));
       inner.appendChild(svg('ellipse', { cx:c.x, cy:c.y, rx:obj.w / 2, ry:obj.h / 2, class:'object-stroke' }));
@@ -547,6 +581,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       inner.appendChild(svg('rect', { x:obj.x, y:obj.y, width:obj.w, height:obj.h, rx:r, fill:obj.color, 'fill-opacity':.13, class:'object-fill' }));
       inner.appendChild(svg('rect', { x:obj.x, y:obj.y, width:obj.w, height:obj.h, rx:r, class:'object-stroke' }));
     }
+    const tick = Math.min(obj.w, obj.h) * .14;
+    const tx = obj.x + obj.w * .34, ty = obj.y + obj.h * .76;
+    inner.appendChild(svg('line', { x1:tx - tick / 2, y1:ty, x2:tx + tick / 2, y2:ty, class:'object-orient' }));
     g.appendChild(inner);
     if (Math.min(obj.w, obj.h) * scale > 34 && obj.label) {
       addText(g, obj.label, c.x, c.y, { class:'object-label', style:`font-size:${8.5 / scale}px` });
@@ -621,8 +658,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       g.appendChild(svg('line', { x1:item.x1, y1:item.y1, x2:item.x2, y2:item.y2, stroke:COLORS.cyan, 'stroke-width':item.thickness + .025, 'stroke-linecap':'round', opacity:.58, 'pointer-events':'none' }));
       g.appendChild(makeHandle(item.x1, item.y1, scale, item.id, 'p1', { endpoint:true }));
       g.appendChild(makeHandle(item.x2, item.y2, scale, item.id, 'p2', { endpoint:true }));
-      const c = getCenter(item);
-      g.appendChild(makePill(`${fmt(wallLength(item))} m`, c.x, c.y - .37, scale, { size:9.5, strong:true }));
       return g;
     }
     if (item.type === 'door' || item.type === 'window') {
@@ -719,10 +754,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
   /* snapping */
   function snapStep(){ const s = state.view.scale; return s > 75 ? .05 : s > 38 ? .1 : .25; }
-  function collectAnchors(excludeId){
+  function collectAnchors(excludeIds){
+    const excluded = excludeIds instanceof Set ? excludeIds : new Set([excludeIds].flat().filter(Boolean));
     const anchors = [];
     for (const item of state.items) {
-      if (item.id === excludeId) continue;
+      if (excluded.has(item.id)) continue;
       if (item.type === 'wall') {
         anchors.push({ x:item.x1, y:item.y1, kind:'CORNER' });
         anchors.push({ x:item.x2, y:item.y2, kind:'CORNER' });
@@ -737,7 +773,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function snapPoint(world, opts = {}){
     const v = visibleBounds(2);
     if (!state.snap) return { x:world.x, y:world.y, type:'free', guides:[] };
-    const th = 14 / state.view.scale, anchors = collectAnchors(opts.excludeId);
+    const excluded = new Set([opts.excludeId, ...(opts.excludeIds || [])].filter(Boolean));
+    const th = 14 / state.view.scale, anchors = collectAnchors(excluded);
     let best = null, bestD = Infinity;
     for (const a of anchors) {
       const d = Math.hypot(a.x - world.x, a.y - world.y);
@@ -745,7 +782,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     }
     if (best) return { x:best.x, y:best.y, type:'anchor', label:best.kind, guides:[{ x1:best.x, y1:v.y0, x2:best.x, y2:v.y1 }, { x1:v.x0, y1:best.y, x2:v.x1, y2:best.y }] };
     for (const item of state.items) {
-      if (item.id === opts.excludeId || item.type !== 'wall') continue;
+      if (excluded.has(item.id) || item.type !== 'wall') continue;
       const p = pointToSegment(world, { x:item.x1, y:item.y1 }, { x:item.x2, y:item.y2 });
       if (p.dist < th && p.dist < bestD) { bestD = p.dist; best = { x:p.x, y:p.y, kind:'EDGE' }; }
     }
@@ -769,6 +806,14 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     return { x, y, type:ax !== null || ay !== null ? 'align' : 'grid', guides };
   }
   /* interactions */
+  function beginChange(it){
+    if (!it || it.changed) return;
+    it.changed = true;
+    collapseInspectorForCanvas();
+    if (it.resetDraft) state.wallDraft = null;
+    if (it.baseSnapshot) pushHistory(it.baseSnapshot);
+    else pushHistory();
+  }
   function setActiveSnap(s){ state.activeSnap = s; }
   function updatePreviewForDrag(it, world){
     if (it.kind === 'drawWall') {
@@ -794,20 +839,27 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         state.selection = id;
         buildInspector();
         if (item.type === 'wall' && (handle === 'p1' || handle === 'p2')) {
-          pushHistory();
-          state.interaction = { kind:'resizeWall', id, handle };
+          const x = handle === 'p1' ? item.x1 : item.x2, y = handle === 'p1' ? item.y1 : item.y2;
+          const links = endpointLinks(x, y, id);
+          state.interaction = {
+            kind:'resizeWall', id, handle, links, linkedIds:links.map(l => l.id),
+            baseSnapshot:snapshot(), resetDraft:true
+          };
         } else if ((item.type === 'door' || item.type === 'window') && (handle === 'o-start' || handle === 'o-end')) {
           const geo = openingGeometry(item);
           if (!geo) return;
-          pushHistory();
-          state.interaction = { kind:'resizeOpening', id, handle, fixedParam:handle === 'o-start' ? geo.gapEnd : geo.gapStart };
+          state.interaction = {
+            kind:'resizeOpening', id, handle, fixedParam:handle === 'o-start' ? geo.gapEnd : geo.gapStart,
+            baseSnapshot:snapshot()
+          };
         } else if (handle === 'rot') {
           const c = getCenter(item);
-          pushHistory();
-          state.interaction = { kind:'rotateItem', id, center:c, startAngle:Math.atan2(world.y - c.y, world.x - c.x), baseRot:item.rot || 0 };
+          state.interaction = {
+            kind:'rotateItem', id, center:c, startAngle:Math.atan2(world.y - c.y, world.x - c.x),
+            baseRot:item.rot || 0, baseSnapshot:snapshot()
+          };
         } else {
-          pushHistory();
-          state.interaction = { kind:'resizeItem', id, handle, base:clone(item) };
+          state.interaction = { kind:'resizeItem', id, handle, base:clone(item), baseSnapshot:snapshot() };
         }
         render();
         return;
@@ -817,10 +869,17 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         if (!item) return;
         state.selection = id;
         buildInspector();
-        pushHistory();
-        if (item.type === 'wall') state.interaction = { kind:'moveWall', id, startWorld:world, base:clone(item), moved:false };
-        else if (item.type === 'door' || item.type === 'window') state.interaction = { kind:'moveOpening', id, startWorld:world, base:clone(item), moved:false };
-        else state.interaction = { kind:'moveItem', id, startWorld:world, base:clone(item), moved:false };
+        if (item.type === 'wall') {
+          const links1 = endpointLinks(item.x1, item.y1, id), links2 = endpointLinks(item.x2, item.y2, id);
+          state.interaction = {
+            kind:'moveWall', id, startWorld:world, base:clone(item), moved:false, links1, links2,
+            linkedIds:[...links1, ...links2].map(l => l.id), baseSnapshot:snapshot(), resetDraft:true
+          };
+        } else if (item.type === 'door' || item.type === 'window') {
+          state.interaction = { kind:'moveOpening', id, startWorld:world, base:clone(item), moved:false, baseSnapshot:snapshot() };
+        } else {
+          state.interaction = { kind:'moveItem', id, startWorld:world, base:clone(item), moved:false, baseSnapshot:snapshot() };
+        }
         render();
         return;
       }
@@ -845,7 +904,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     }
 
     if (state.tool === 'door' || state.tool === 'window') {
-      const near = getNearestWall(world, 1);
+      const near = getNearestWall(world, 30 / state.view.scale);
       if (!near) { toast('Tap closer to a wall'); return; }
       const len = wallLength(near.wall), width = state.tool === 'door' ? .9 : 1.2;
       const t = clamp(near.t, (width / 2 + .02) / len, 1 - (width / 2 + .02) / len);
@@ -868,12 +927,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (state.tool === 'select' && bothInside && (selected.type === 'room' || selected.type === 'object')) {
       const mid = { x:(pts[0].x + pts[1].x) / 2, y:(pts[0].y + pts[1].y) / 2 };
       state.interaction = {
-        kind:'itemGesture', id:selected.id, base:clone(selected),
+        kind:'itemGesture', id:selected.id, base:clone(selected), baseSnapshot:snapshot(),
         startDist:Math.max(8, Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y)),
         startAngle:Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x),
         startMid:toWorld(mid)
       };
-      pushHistory();
       return;
     }
     const a = pts[0], b = pts[1], mid = { x:(a.x + b.x) / 2, y:(a.y + b.y) / 2 };
@@ -927,9 +985,13 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       const baseC = { x:it.base.x + it.base.w / 2, y:it.base.y + it.base.h / 2 };
       const c = { x:baseC.x + midWorld.x - it.startMid.x, y:baseC.y + midWorld.y - it.startMid.y };
       const w = Math.max(.3, it.base.w * ratio), h = Math.max(.3, it.base.h * ratio);
-      item.w = Math.round(w * 1000) / 1000; item.h = Math.round(h * 1000) / 1000;
-      item.rot = Math.round(newRot * 10) / 10;
-      item.x = c.x - w / 2; item.y = c.y - h / 2;
+      const nextW = round3(w), nextH = round3(h), nextRot = Math.round(newRot * 10) / 10;
+      const nextX = round3(c.x - w / 2), nextY = round3(c.y - h / 2);
+      if (item.w === nextW && item.h === nextH && item.rot === nextRot && item.x === nextX && item.y === nextY) return;
+      beginChange(it);
+      item.w = nextW; item.h = nextH;
+      item.rot = nextRot;
+      item.x = nextX; item.y = nextY;
       scheduleRender();
       return;
     }
@@ -951,7 +1013,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     }
 
     if (it.kind === 'placeOpening') {
-      const near = getNearestWall(world, 1);
+      const near = getNearestWall(world, 30 / state.view.scale);
       if (near) {
         const len = wallLength(near.wall), width = it.op.width;
         it.op.wallId = near.wall.id;
@@ -968,7 +1030,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       if (!item) return;
       let nx = it.base.x + world.x - it.startWorld.x, ny = it.base.y + world.y - it.startWorld.y;
       if (state.snap) { const st = snapStep(); nx = Math.round(nx / st) * st; ny = Math.round(ny / st) * st; }
-      item.x = Math.round(nx * 1000) / 1000; item.y = Math.round(ny * 1000) / 1000;
+      nx = round3(nx); ny = round3(ny);
+      if (item.x === nx && item.y === ny) return;
+      beginChange(it);
+      item.x = nx; item.y = ny;
       it.moved = true;
       scheduleRender();
       return;
@@ -979,8 +1044,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       if (!wall) return;
       let dx = world.x - it.startWorld.x, dy = world.y - it.startWorld.y;
       if (state.snap) { const st = snapStep(); dx = Math.round((it.base.x1 + dx) / st) * st - it.base.x1; dy = Math.round((it.base.y1 + dy) / st) * st - it.base.y1; }
-      wall.x1 = Math.round((it.base.x1 + dx) * 1000) / 1000; wall.y1 = Math.round((it.base.y1 + dy) * 1000) / 1000;
-      wall.x2 = Math.round((it.base.x2 + dx) * 1000) / 1000; wall.y2 = Math.round((it.base.y2 + dy) * 1000) / 1000;
+      const next = {
+        x1:round3(it.base.x1 + dx), y1:round3(it.base.y1 + dy),
+        x2:round3(it.base.x2 + dx), y2:round3(it.base.y2 + dy)
+      };
+      if (wall.x1 === next.x1 && wall.y1 === next.y1 && wall.x2 === next.x2 && wall.y2 === next.y2) return;
+      beginChange(it);
+      Object.assign(wall, next);
+      setLinkedEndpoints(it.links1, wall.x1, wall.y1);
+      setLinkedEndpoints(it.links2, wall.x2, wall.y2);
       it.moved = true;
       scheduleRender();
       return;
@@ -995,7 +1067,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       const frac = op.width / geo.len;
       let t = clamp(proj.t, frac / 2 + .005, 1 - frac / 2 - .005);
       if (state.snap) t = Math.round(t * geo.len / .1) * .1 / geo.len;
-      op.t = clamp(t, frac / 2, 1 - frac / 2);
+      t = round3(clamp(t, frac / 2, 1 - frac / 2));
+      if (op.t === t) return;
+      beginChange(it);
+      op.t = t;
       it.moved = true;
       scheduleRender();
       return;
@@ -1004,9 +1079,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (it.kind === 'resizeWall') {
       const wall = getItem(it.id);
       if (!wall) return;
-      const snapped = snapPoint(world, { excludeId:wall.id });
+      const snapped = snapPoint(world, { excludeId:wall.id, excludeIds:it.linkedIds });
       setActiveSnap(snapped);
-      if (it.handle === 'p1') { wall.x1 = snapped.x; wall.y1 = snapped.y; } else { wall.x2 = snapped.x; wall.y2 = snapped.y; }
+      const other = it.handle === 'p1' ? { x:wall.x2, y:wall.y2 } : { x:wall.x1, y:wall.y1 };
+      if (Math.hypot(snapped.x - other.x, snapped.y - other.y) < .1) return;
+      const nx = round3(snapped.x), ny = round3(snapped.y);
+      const same = it.handle === 'p1' ? wall.x1 === nx && wall.y1 === ny : wall.x2 === nx && wall.y2 === ny;
+      if (same) return;
+      beginChange(it);
+      if (it.handle === 'p1') { wall.x1 = nx; wall.y1 = ny; } else { wall.x2 = nx; wall.y2 = ny; }
+      setLinkedEndpoints(it.links, nx, ny);
       scheduleRender();
       return;
     }
@@ -1023,8 +1105,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       const lx = dx * Math.cos(a) - dy * Math.sin(a), ly = dx * Math.sin(a) + dy * Math.cos(a);
       const newW = Math.max(.25, sx * lx), newH = Math.max(.25, sy * ly);
       const center = rotatedPoint(opp.x + sx * newW / 2, opp.y + sy * newH / 2, opp.x, opp.y, b.rot);
-      item.w = Math.round(newW * 1000) / 1000; item.h = Math.round(newH * 1000) / 1000;
-      item.x = Math.round((center.x - newW / 2) * 1000) / 1000; item.y = Math.round((center.y - newH / 2) * 1000) / 1000;
+      const nextW = round3(newW), nextH = round3(newH);
+      const nextX = round3(center.x - newW / 2), nextY = round3(center.y - newH / 2);
+      if (item.w === nextW && item.h === nextH && item.x === nextX && item.y === nextY) return;
+      beginChange(it);
+      item.w = nextW; item.h = nextH;
+      item.x = nextX; item.y = nextY;
       scheduleRender();
       return;
     }
@@ -1035,7 +1121,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       const angle = Math.atan2(world.y - it.center.y, world.x - it.center.x);
       let next = ((it.baseRot + deg(angle - it.startAngle)) % 360 + 360) % 360;
       if (state.snap) { const sr = Math.round(next / 15) * 15; if (Math.abs(next - sr) < 1.4) next = sr; }
-      item.rot = Math.round(next * 10) / 10;
+      next = Math.round(next * 10) / 10;
+      if (item.rot === next) return;
+      beginChange(it);
+      item.rot = next;
       scheduleRender();
       return;
     }
@@ -1051,9 +1140,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       let startP, endP;
       if (it.handle === 'o-start') { startP = Math.min(param, it.fixedParam - .2); endP = it.fixedParam; }
       else { startP = it.fixedParam; endP = Math.max(param, it.fixedParam + .2); }
-      const width = clamp(endP - startP, .2, geo.len - .05);
-      op.width = Math.round(width * 100) / 100;
-      op.t = clamp((startP + endP) / 2 / geo.len, op.width / 2 / geo.len, 1 - op.width / 2 / geo.len);
+      const width = round3(clamp(endP - startP, .2, geo.len - .05));
+      const t = round3(clamp((startP + endP) / 2 / geo.len, width / 2 / geo.len, 1 - width / 2 / geo.len));
+      if (op.width === width && op.t === t) return;
+      beginChange(it);
+      op.width = width;
+      op.t = t;
       scheduleRender();
     }
   }
@@ -1066,6 +1158,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     board.classList.remove('panning');
     const it = state.interaction;
     if (state.pointers.size === 1 && it && (it.kind === 'pinchView' || it.kind === 'itemGesture')) {
+      if (it.kind === 'itemGesture' && it.changed) queueSave();
       state.interaction = null; state.gestureLock = true; return;
     }
     if (state.pointers.size > 0) return;
@@ -1113,15 +1206,26 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     } else if (it.kind === 'panView' && !it.moved && state.tool === 'select') {
       state.selection = null; buildInspector();
     }
+    if (it.kind === 'resizeWall' || it.kind === 'moveWall') {
+      normalizeOpeningsFor([it.id, ...(it.linkedIds || [])]);
+    }
+    const shouldSave = it.kind !== 'panView' && it.kind !== 'pinchView';
     state.interaction = null; state.preview = null; state.activeSnap = null;
     render();
+    if (shouldSave) queueSave();
   }
 
   function onPointerCancel(e){
     state.pointers.delete(e.pointerId);
     if (state.pointers.size === 0) {
+      const it = state.interaction;
+      if (it && (it.kind === 'resizeWall' || it.kind === 'moveWall')) {
+        normalizeOpeningsFor([it.id, ...(it.linkedIds || [])]);
+      }
+      const shouldSave = it && it.kind !== 'panView' && it.kind !== 'pinchView';
       state.interaction = null; state.preview = null; state.activeSnap = null; state.gestureLock = false;
       scheduleRender();
+      if (shouldSave) queueSave();
     }
   }
 
@@ -1167,6 +1271,43 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       if (p.dist <= maxDistance && (!best || p.dist < best.dist)) best = { wall, ...p };
     }
     return best;
+  }
+  function endpointLinks(x, y, excludeId){
+    const links = [];
+    for (const wall of state.items) {
+      if (wall.type !== 'wall' || wall.id === excludeId) continue;
+      if (Math.hypot(wall.x1 - x, wall.y1 - y) <= ENDPOINT_EPS) links.push({ id:wall.id, end:'p1' });
+      if (Math.hypot(wall.x2 - x, wall.y2 - y) <= ENDPOINT_EPS) links.push({ id:wall.id, end:'p2' });
+    }
+    return links;
+  }
+  function setLinkedEndpoints(links, x, y){
+    for (const link of links || []) {
+      const wall = getItem(link.id);
+      if (!wall || wall.type !== 'wall') continue;
+      if (link.end === 'p1') { wall.x1 = round3(x); wall.y1 = round3(y); }
+      else { wall.x2 = round3(x); wall.y2 = round3(y); }
+    }
+  }
+  function normalizeWallOpenings(wall){
+    if (!wall || wall.type !== 'wall') return;
+    const len = wallLength(wall);
+    if (len < .05) return;
+    for (const op of state.items) {
+      if (op.wallId !== wall.id || (op.type !== 'door' && op.type !== 'window')) continue;
+      const maxWidth = Math.max(.02, len - .02);
+      op.width = round3(clamp(op.width, .02, maxWidth));
+      const frac = op.width / len;
+      op.t = round3(clamp(op.t, frac / 2, 1 - frac / 2));
+    }
+  }
+  function normalizeOpeningsFor(ids){
+    const seen = new Set();
+    for (const id of ids || []) {
+      if (seen.has(id)) continue;
+      seen.add(id);
+      normalizeWallOpenings(getItem(id));
+    }
   }
 
   /* view */
@@ -1224,8 +1365,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const prev = state.history.pop();
     state.items = clone(prev.items);
     state.selection = prev.selection && getItem(prev.selection) ? prev.selection : null;
-    state.preview = null; state.activeSnap = null;
-    buildInspector(); render(); updateHistoryButtons(); toast('Undone');
+    state.preview = null; state.activeSnap = null; state.wallDraft = null;
+    buildInspector(); render(); updateHistoryButtons(); queueSave(); toast('Undone');
   }
   function redo(){
     if (!state.future.length) return;
@@ -1233,8 +1374,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const next = state.future.pop();
     state.items = clone(next.items);
     state.selection = next.selection && getItem(next.selection) ? next.selection : null;
-    state.preview = null; state.activeSnap = null;
-    buildInspector(); render(); updateHistoryButtons(); toast('Redone');
+    state.preview = null; state.activeSnap = null; state.wallDraft = null;
+    buildInspector(); render(); updateHistoryButtons(); queueSave(); toast('Redone');
   }
   function updateHistoryButtons(){
     $('#undoBtn').disabled = state.history.length === 0;
@@ -1243,9 +1384,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   /* inspector */
   function field(label, prop, value, opts = {}){
     const full = opts.full ? ' full' : '';
-    if (opts.select) return `<div class="field${full}"><label>${esc(label)}</label><select data-prop="${prop}">${opts.select}</select></div>`;
+    if (opts.select) return `<div class="field${full}"><label for="f-${prop}">${esc(label)}</label><select id="f-${prop}" data-prop="${prop}">${opts.select}</select></div>`;
     const unit = opts.unit ? `<span class="unit">${esc(opts.unit)}</span>` : '';
-    return `<div class="field${full}"><label>${esc(label)}</label><div class="input-wrap"><input class="${opts.unit ? 'with-unit' : ''}" type="${opts.type || 'number'}" inputmode="${opts.type === 'text' ? 'text' : 'decimal'}" step="${opts.step || '.05'}" data-prop="${prop}" value="${esc(value)}" ${opts.min !== undefined ? `min="${opts.min}"` : ''}>${unit}</div></div>`;
+    const textAttrs = opts.type === 'text' ? ' maxlength="80"' : '';
+    return `<div class="field${full}"><label for="f-${prop}">${esc(label)}</label><div class="input-wrap"><input id="f-${prop}" class="${opts.unit ? 'with-unit' : ''}" type="${opts.type || 'number'}" inputmode="${opts.type === 'text' ? 'text' : 'decimal'}" step="${opts.step || '.05'}" data-prop="${prop}" value="${esc(value)}"${textAttrs} ${opts.min !== undefined ? `min="${opts.min}"` : ''}>${unit}</div></div>`;
   }
 
   function wallDraftFor(item){
@@ -1286,6 +1428,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const item = getItem(state.selection), draft = wallDraftFor(item);
     if (!draft) return;
     const v = draft.values;
+    const links1 = endpointLinks(item.x1, item.y1, item.id), links2 = endpointLinks(item.x2, item.y2, item.id);
     let x1 = Number.isFinite(v.x1) ? v.x1 : item.x1, y1 = Number.isFinite(v.y1) ? v.y1 : item.y1;
     let x2 = Number.isFinite(v.x2) ? v.x2 : item.x2, y2 = Number.isFinite(v.y2) ? v.y2 : item.y2;
     let len = Math.hypot(x2 - x1, y2 - y1);
@@ -1298,17 +1441,22 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         if (baseLen >= 1e-6) { ux = (item.x2 - item.x1) / baseLen; uy = (item.y2 - item.y1) / baseLen; }
       }
       x2 = x1 + ux * desired; y2 = y1 + uy * desired;
+      len = desired;
     }
+    if (len < .1) { toast('Wall must be at least 0.10 m'); return; }
     const thickness = clamp(Number.isFinite(v.thickness) ? v.thickness : item.thickness, .05, 1);
     const changed = Math.abs(item.x1 - x1) > .0005 || Math.abs(item.y1 - y1) > .0005 ||
       Math.abs(item.x2 - x2) > .0005 || Math.abs(item.y2 - y2) > .0005 || Math.abs(item.thickness - thickness) > .0005;
     if (!changed) { startWallDraft(item); buildInspector(); render(); toast('No wall changes to apply'); return; }
     pushHistory();
-    item.x1 = Math.round(x1 * 1000) / 1000; item.y1 = Math.round(y1 * 1000) / 1000;
-    item.x2 = Math.round(x2 * 1000) / 1000; item.y2 = Math.round(y2 * 1000) / 1000;
-    item.thickness = Math.round(thickness * 1000) / 1000;
+    item.x1 = round3(x1); item.y1 = round3(y1);
+    item.x2 = round3(x2); item.y2 = round3(y2);
+    item.thickness = round3(thickness);
+    setLinkedEndpoints(links1, item.x1, item.y1);
+    setLinkedEndpoints(links2, item.x2, item.y2);
+    normalizeOpeningsFor([item.id, ...links1.map(l => l.id), ...links2.map(l => l.id)]);
     startWallDraft(item);
-    buildInspector(); render(); updateHistoryButtons(); toast('Wall changes applied');
+    buildInspector(); render(); updateHistoryButtons(); queueSave(); toast('Wall changes applied');
   }
   function cancelWallDraft(){
     const item = getItem(state.selection);
@@ -1317,10 +1465,19 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     buildInspector(); render(); toast('Wall changes discarded');
   }
 
+  function rotationControls(item){
+    const rot = Math.round((((item.rot || 0) % 360) + 360) % 360);
+    return `<div class="rot-controls">
+      <div class="rot-line"><span class="rot-caption">Rotate</span><input class="rot-slider" type="range" min="0" max="359" step="1" value="${rot}" data-prop="rot" aria-label="Rotation angle"><output class="rot-value" data-rot-value>${rot}°</output></div>
+      <div class="rot-actions"><button class="mini-btn" data-action="rotate-step" data-step="-90">−90°</button><button class="mini-btn" data-action="rotate-step" data-step="-15">−15°</button><button class="mini-btn" data-action="rotate-step" data-step="15">+15°</button><button class="mini-btn" data-action="rotate-step" data-step="90">+90°</button></div>
+    </div>`;
+  }
   function buildInspector(){
     const item = getItem(state.selection);
     if (!item) {
       state.wallDraft = null;
+      inspector.dataset.itemId = '';
+      inspector.classList.remove('sheet-collapsed');
       const area = totalArea(), rooms = state.items.filter(i => i.type === 'room').length, walls = state.items.filter(i => i.type === 'wall').length;
       inspector.innerHTML = `
         <div class="insp-head"><div><div class="insp-kicker">Workspace</div><h2 class="insp-title">Project overview</h2><div class="insp-sub">Metric blueprint · 1 unit = 1 metre</div></div><button class="insp-close desktop-only" data-action="close-inspector" aria-label="Close"><svg><use href="#i-close"/></svg></button></div>
@@ -1339,16 +1496,20 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       return;
     }
     inspector.classList.add('open');
-    if (item.type === 'wall') startWallDraft(item); else state.wallDraft = null;
+    if (inspector.dataset.itemId !== item.id) inspector.classList.remove('sheet-collapsed');
+    inspector.dataset.itemId = item.id;
+    if (item.type === 'wall') {
+      if (!wallDraftFor(item)) startWallDraft(item);
+    } else state.wallDraft = null;
     let head = '', body = '', actions = '';
     if (item.type === 'room') {
       head = `<div class="insp-kicker">Space / Room</div><h2 class="insp-title">${esc(item.label || 'Room')}</h2><div class="insp-sub">Room geometry · snaps to metre grid</div>`;
-      body = `${field('Name', 'label', item.label, { type:'text', full:true })}<div class="field-grid" style="margin-top:8px">${field('X position', 'x', fmt(item.x), { unit:'m' })}${field('Y position', 'y', fmt(item.y), { unit:'m' })}${field('Width', 'w', fmt(item.w), { unit:'m', min:0 })}${field('Depth', 'h', fmt(item.h), { unit:'m', min:0 })}${field('Rotation', 'rot', fmt(item.rot, 1), { unit:'°', step:.5, full:true })}</div><div class="metric-card"><span>Room floor area</span><strong data-live="area">${fmt(roomArea(item))} <small>m²</small></strong></div>`;
+      body = `${field('Name', 'label', item.label, { type:'text', full:true })}<div class="field-grid" style="margin-top:8px">${field('X position', 'x', fmt(item.x), { unit:'m' })}${field('Y position', 'y', fmt(item.y), { unit:'m' })}${field('Width', 'w', fmt(item.w), { unit:'m', min:0 })}${field('Depth', 'h', fmt(item.h), { unit:'m', min:0 })}${field('Rotation', 'rot', fmt(item.rot, 1), { unit:'°', step:.5, full:true })}</div>${rotationControls(item)}<div class="metric-card"><span>Room floor area</span><strong data-live="area">${fmt(roomArea(item))} <small>m²</small></strong></div>`;
       actions = `<button class="btn grow" data-action="duplicate"><svg><use href="#i-copy"/></svg>Duplicate</button><button class="btn grow danger" data-action="delete"><svg><use href="#i-trash"/></svg>Delete</button>`;
     } else if (item.type === 'object') {
       const options = `<option value="rect"${item.shape === 'rect' ? ' selected' : ''}>Rectangle</option><option value="circle"${item.shape === 'circle' ? ' selected' : ''}>Circle / ellipse</option>`;
       head = `<div class="insp-kicker">Freestanding Object</div><h2 class="insp-title">${esc(item.label || 'Object')}</h2><div class="insp-sub">Customisable plan object</div>`;
-      body = `${field('Name', 'label', item.label, { type:'text', full:true })}${field('Shape', 'shape', '', { select:options, full:true })}<div class="field-grid" style="margin-top:8px">${field('X position', 'x', fmt(item.x), { unit:'m' })}${field('Y position', 'y', fmt(item.y), { unit:'m' })}${field('Width', 'w', fmt(item.w), { unit:'m', min:0 })}${field('Height', 'h', fmt(item.h), { unit:'m', min:0 })}${field('Rotation', 'rot', fmt(item.rot, 1), { unit:'°', step:.5, full:true })}</div><div class="metric-card"><span>Footprint</span><strong data-live="area">${fmt(item.w * item.h)} <small>m²</small></strong></div>`;
+      body = `${field('Name', 'label', item.label, { type:'text', full:true })}${field('Shape', 'shape', '', { select:options, full:true })}<div class="field-grid" style="margin-top:8px">${field('X position', 'x', fmt(item.x), { unit:'m' })}${field('Y position', 'y', fmt(item.y), { unit:'m' })}${field('Width', 'w', fmt(item.w), { unit:'m', min:0 })}${field('Height', 'h', fmt(item.h), { unit:'m', min:0 })}${field('Rotation', 'rot', fmt(item.rot, 1), { unit:'°', step:.5, full:true })}</div>${rotationControls(item)}<div class="flip-row"><button class="mini-btn" data-action="flip-object" data-axis="x" aria-label="Flip object horizontally" aria-pressed="${item.flipX ? 'true' : 'false'}">Flip H</button><button class="mini-btn" data-action="flip-object" data-axis="y" aria-label="Flip object vertically" aria-pressed="${item.flipY ? 'true' : 'false'}">Flip V</button></div><div class="metric-card"><span>Footprint</span><strong data-live="area">${fmt(item.w * item.h)} <small>m²</small></strong></div>`;
       actions = `<button class="btn grow" data-action="duplicate"><svg><use href="#i-copy"/></svg>Duplicate</button><button class="btn grow danger" data-action="delete"><svg><use href="#i-trash"/></svg>Delete</button>`;
     } else if (item.type === 'wall') {
       head = `<div class="insp-kicker">Structure / Wall</div><h2 class="insp-title">Wall segment</h2><div class="insp-sub">Set exact length and thickness</div>`;
@@ -1367,29 +1528,59 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       actions = `<button class="btn grow" data-action="duplicate"><svg><use href="#i-copy"/></svg>Duplicate</button><button class="btn grow danger" data-action="delete"><svg><use href="#i-trash"/></svg>Delete</button>`;
     }
     inspector.innerHTML = `
-      <div class="insp-head"><div>${head}</div><button class="insp-close" data-action="close-inspector" aria-label="Close inspector"><svg><use href="#i-close"/></svg></button></div>
+      <div class="insp-head"><div>${head}</div><button class="insp-collapse" data-action="toggle-inspector" aria-expanded="true" aria-label="Collapse inspector"><svg><use href="#i-chevron"/></svg></button><button class="insp-close" data-action="close-inspector" aria-label="Close inspector"><svg><use href="#i-close"/></svg></button></div>
       ${body}
       <div class="insp-actions">${actions}</div>
       <button class="btn" style="width:100%;margin-top:7px" data-action="fit"><svg><use href="#i-fit"/></svg>Fit plan to view</button>
     `;
+    syncInspectorCollapseUI();
   }
 
-  function syncInspectorValues(){
+  function isCompactSheet(){ return window.matchMedia('(max-width: 900px)').matches; }
+  function syncInspectorCollapseUI(){
+    const btn = inspector.querySelector('[data-action="toggle-inspector"]');
+    if (!btn) return;
+    const collapsed = inspector.classList.contains('sheet-collapsed');
+    btn.setAttribute('aria-expanded', String(!collapsed));
+    btn.setAttribute('aria-label', collapsed ? 'Expand inspector' : 'Collapse inspector');
+  }
+  function setInspectorCollapsed(collapsed){
+    inspector.classList.toggle('sheet-collapsed', collapsed);
+    if (collapsed && inspector.contains(document.activeElement)) document.activeElement.blur();
+    syncInspectorCollapseUI();
+  }
+  function toggleInspector(){
+    if (!inspector.classList.contains('open')) return;
+    setInspectorCollapsed(!inspector.classList.contains('sheet-collapsed'));
+  }
+  function collapseInspectorForCanvas(){
+    if (isCompactSheet() && inspector.classList.contains('open')) setInspectorCollapsed(true);
+  }
+
+  function syncInspectorValues(force = false){
     const item = getItem(state.selection);
     if (!item) return;
     const draft = wallDraftFor(item), vals = draft ? draft.values : null;
     inspector.querySelectorAll('[data-prop]').forEach(input => {
-      if (document.activeElement === input) return;
+      if (!force && document.activeElement === input) return;
       const prop = input.getAttribute('data-prop');
       if (prop === 'label') { input.value = item.label || ''; return; }
       if (prop === 'shape') { input.value = item.shape || 'rect'; return; }
       if (prop === 'tPct') { input.value = fmt(item.t * 100, 1); return; }
       if (prop === 'length') { input.value = fmt(vals ? vals.length : wallLength(item), 2); return; }
+      if (prop === 'rot' && input.type === 'range') {
+        input.value = String(Math.round((((item.rot || 0) % 360) + 360) % 360));
+        return;
+      }
       if (['x','y','w','h','rot','width','thickness','x1','y1','x2','y2'].includes(prop)) {
         const value = vals && Object.prototype.hasOwnProperty.call(vals, prop) ? vals[prop] : item[prop];
         input.value = prop === 'rot' ? fmt(value, 1) : fmt(value, 2);
       }
     });
+    const rotValue = inspector.querySelector('[data-rot-value]');
+    if (rotValue && (item.type === 'room' || item.type === 'object')) {
+      rotValue.textContent = `${Math.round((((item.rot || 0) % 360) + 360) % 360)}°`;
+    }
     const live = inspector.querySelector('[data-live="area"]');
     if (live) live.innerHTML = `${fmt(item.type === 'room' ? roomArea(item) : item.w * item.h)} <small>m²</small>`;
     const len = inspector.querySelector('[data-live="length"]');
@@ -1400,37 +1591,38 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const item = getItem(state.selection);
     if (!item) return;
     const value = raw;
-    if (prop === 'label') item.label = String(value).trim() || (item.type === 'room' ? 'ROOM' : 'OBJECT');
+    if (prop === 'label') item.label = String(value).trim().slice(0, 80) || (item.type === 'room' ? 'ROOM' : 'OBJECT');
     else if (prop === 'shape') item.shape = value === 'circle' ? 'circle' : 'rect';
     else {
-      const n = parseFloat(value);
-      if (!Number.isFinite(n)) return;
-      if (prop === 'thickness') item.thickness = clamp(n, .05, 1);
+      const n = draftNumber(value);
+      if (n === null) return;
+      if (prop === 'thickness') item.thickness = round3(clamp(n, .05, 1));
       else if (item.type === 'room' || item.type === 'object') {
-        if (prop === 'w') item.w = Math.max(.2, n);
-        else if (prop === 'h') item.h = Math.max(.2, n);
-        else if (prop === 'rot') item.rot = ((n % 360) + 360) % 360;
-        else if (prop === 'x') item.x = n;
-        else if (prop === 'y') item.y = n;
+        if (prop === 'w') item.w = round3(Math.max(.2, n));
+        else if (prop === 'h') item.h = round3(Math.max(.2, n));
+        else if (prop === 'rot') item.rot = Math.round((((n % 360) + 360) % 360) * 10) / 10;
+        else if (prop === 'x') item.x = round3(n);
+        else if (prop === 'y') item.y = round3(n);
       } else if (item.type === 'wall') {
-        if (prop === 'x1') item.x1 = n; else if (prop === 'y1') item.y1 = n;
-        else if (prop === 'x2') item.x2 = n; else if (prop === 'y2') item.y2 = n;
+        if (prop === 'x1') item.x1 = round3(n); else if (prop === 'y1') item.y1 = round3(n);
+        else if (prop === 'x2') item.x2 = round3(n); else if (prop === 'y2') item.y2 = round3(n);
         if (wallLength(item) < .1) toast('Wall is too short');
       } else if (item.type === 'door' || item.type === 'window') {
         const geo = openingGeometry(item);
         if (prop === 'width' && geo) {
-          item.width = clamp(n, .2, geo.len - .05);
+          item.width = round3(clamp(n, .02, Math.max(.02, geo.len - .02)));
           const frac = item.width / geo.len;
-          item.t = clamp(item.t, frac / 2, 1 - frac / 2);
+          item.t = round3(clamp(item.t, frac / 2, 1 - frac / 2));
         } else if (prop === 'tPct' && geo) {
           const frac = item.width / geo.len;
-          item.t = clamp(n / 100, frac / 2, 1 - frac / 2);
+          item.t = round3(clamp(n / 100, frac / 2, 1 - frac / 2));
         }
       }
     }
     render();
     if (prop === 'label' || prop === 'shape') buildInspector();
-    else syncInspectorValues();
+    else syncInspectorValues(true);
+    queueSave();
   }
 
   inspector.addEventListener('focusin', e => {
@@ -1439,15 +1631,39 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   });
   inspector.addEventListener('input', e => {
     if (wallDraftFor(getItem(state.selection))) { updateWallDraft(e.target); return; }
-    if (e.target.getAttribute('data-prop') === 'label') {
+    const prop = e.target.getAttribute('data-prop');
+    if (prop === 'rot' && e.target.type === 'range') {
+      const item = getItem(state.selection), n = draftNumber(e.target.value);
+      if (!item || n === null) return;
+      item.rot = Math.round((((n % 360) + 360) % 360) * 10) / 10;
+      const out = inspector.querySelector('[data-rot-value]');
+      if (out) out.textContent = `${Math.round(item.rot)}°`;
+      scheduleRender();
+      return;
+    }
+    if (prop === 'label') {
       const item = getItem(state.selection);
-      if (item) { item.label = e.target.value; scheduleRender(); }
+      if (item) { item.label = e.target.value.slice(0, 80); scheduleRender(); queueSave(); }
     }
   });
   inspector.addEventListener('change', e => {
     const input = e.target.closest('[data-prop]');
     if (!input) return;
-    if (wallDraftFor(getItem(state.selection))) { updateWallDraft(input); return; }
+    if (wallDraftFor(getItem(state.selection))) {
+      if (input.type !== 'text' && draftNumber(input.value) === null) {
+        syncInspectorValues(true);
+        toast('Enter a valid number');
+        return;
+      }
+      updateWallDraft(input);
+      return;
+    }
+    if (input.tagName === 'INPUT' && input.type === 'number' && draftNumber(input.value) === null) {
+      state.editSnapshot = null;
+      syncInspectorValues(true);
+      toast('Enter a valid number');
+      return;
+    }
     if (state.editSnapshot) { pushHistory(state.editSnapshot); state.editSnapshot = null; }
     applyProp(input.getAttribute('data-prop'), input.value);
   });
@@ -1461,14 +1677,33 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const action = btn.getAttribute('data-action'), item = getItem(state.selection);
     if (action === 'wall-apply') applyWallDraft();
     else if (action === 'wall-cancel') cancelWallDraft();
+    else if (action === 'toggle-inspector') toggleInspector();
     else if (action === 'close-inspector') { state.selection = null; buildInspector(); render(); }
     else if (action === 'fit') fitPlan();
     else if (action === 'open-export') openProjectModal();
     else if (action === 'delete') deleteSelection();
     else if (action === 'duplicate') duplicateSelection();
-    else if (action === 'flip' && item) { pushHistory(); item.swing *= -1; render(); }
-    else if (action === 'hinge' && item && item.type === 'door') { pushHistory(); item.hinge = item.hinge ? 0 : 1; render(); toast('Door hinge reversed'); }
+    else if (action === 'rotate-step' && item) rotateSelection(parseFloat(btn.getAttribute('data-step')) || 0);
+    else if (action === 'flip-object' && item && item.type === 'object') flipObject(item, btn.getAttribute('data-axis'));
+    else if (action === 'flip' && item) { pushHistory(); item.swing *= -1; render(); queueSave(); }
+    else if (action === 'hinge' && item && item.type === 'door') { pushHistory(); item.hinge = item.hinge ? 0 : 1; render(); queueSave(); toast('Door hinge reversed'); }
   });
+
+  function rotateSelection(step){
+    const item = getItem(state.selection);
+    if (!item || (item.type !== 'room' && item.type !== 'object') || !step) return;
+    pushHistory();
+    applyProp('rot', (item.rot || 0) + step);
+  }
+  function flipObject(item, axis){
+    pushHistory();
+    if (axis === 'x') item.flipX = item.flipX ? 0 : 1;
+    else item.flipY = item.flipY ? 0 : 1;
+    render(); syncInspectorValues();
+    const btn = inspector.querySelector(`[data-action="flip-object"][data-axis="${axis}"]`);
+    if (btn) btn.setAttribute('aria-pressed', String(!!(axis === 'x' ? item.flipX : item.flipY)));
+    queueSave();
+  }
 
   function deleteSelection(){
     const id = state.selection, item = getItem(id);
@@ -1477,7 +1712,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     state.items = state.items.filter(i => i.id !== id);
     if (item.type === 'wall') state.items = state.items.filter(i => !((i.type === 'door' || i.type === 'window') && i.wallId === id));
     state.selection = null;
-    buildInspector(); render(); toast('Element deleted');
+    state.wallDraft = null;
+    buildInspector(); render(); queueSave(); toast('Element deleted');
   }
   function duplicateSelection(){
     const item = getItem(state.selection);
@@ -1518,9 +1754,21 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     toast._t = setTimeout(() => toastEl.classList.remove('show'), 2100);
   }
   function syncToolButtons(){
-    $$('.tool').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-tool') === state.tool));
+    $$('.tool').forEach(btn => {
+      const active = btn.getAttribute('data-tool') === state.tool;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
     board.classList.toggle('tool-select', state.tool === 'select');
     board.classList.toggle('tool-hand', state.tool === 'hand');
+  }
+  function syncViewToggles(){
+    [['#gridBtn', state.showGrid], ['#dimsBtn', state.showDims], ['#snapBtn', state.snap]].forEach(([sel, on]) => {
+      const btn = $(sel);
+      if (!btn) return;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', String(on));
+    });
   }
   const HINTS = {
     select:'Tap an element to edit · drag empty canvas to pan · pinch to zoom',
@@ -1554,9 +1802,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       if (e.target.isConnected) e.target.scrollIntoView({ block:'nearest', behavior:'smooth' });
     }, 220);
   });
-  $('#gridBtn').addEventListener('click', () => { state.showGrid = !state.showGrid; $('#gridBtn').classList.toggle('active', state.showGrid); render(); });
-  $('#dimsBtn').addEventListener('click', () => { state.showDims = !state.showDims; $('#dimsBtn').classList.toggle('active', state.showDims); render(); });
-  $('#snapBtn').addEventListener('click', () => { state.snap = !state.snap; $('#snapBtn').classList.toggle('active', state.snap); toast(state.snap ? 'Smart snapping on' : 'Snapping off'); });
+  $('#gridBtn').addEventListener('click', () => { state.showGrid = !state.showGrid; syncViewToggles(); render(); });
+  $('#dimsBtn').addEventListener('click', () => { state.showDims = !state.showDims; syncViewToggles(); render(); });
+  $('#snapBtn').addEventListener('click', () => { state.snap = !state.snap; syncViewToggles(); toast(state.snap ? 'Smart snapping on' : 'Snapping off'); });
   $('#zoomInBtn').addEventListener('click', () => zoomCenter(1.22));
   $('#zoomOutBtn').addEventListener('click', () => zoomCenter(1 / 1.22));
   $('#fitBtn').addEventListener('click', fitPlan);
@@ -1574,6 +1822,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     .room-label{fill:#dcf9ff;font-family:ui-sans-serif,sans-serif;font-weight:700;text-anchor:middle;dominant-baseline:middle;letter-spacing:.09em}
     .room-area{fill:#66dff8;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle}
     .object-stroke{fill:none;stroke:#75e0f5;stroke-width:1.4;opacity:.75;vector-effect:non-scaling-stroke}
+    .object-orient{stroke:#9cecff;stroke-width:1;vector-effect:non-scaling-stroke;opacity:.42}
     .object-label{fill:#a8eafa;font-family:ui-sans-serif,sans-serif;font-weight:600;text-anchor:middle;dominant-baseline:middle;letter-spacing:.08em}
     .open-gap{fill:none;stroke-linecap:butt}.open-ink{stroke:#7eeaff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
     .open-arc{stroke:rgba(126,234,255,.64);fill:none;stroke-width:1.15;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
@@ -1585,11 +1834,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function buildExportDocument(){
     const b = getContentBounds(), pad = 1;
     const innerW = Math.max(2, b.w + pad * 2), innerH = Math.max(2, b.h + pad * 2);
-    let scale = Math.min(115, 1900 / innerW, 1250 / innerH);
-    scale = Math.max(28, scale);
+    const headerH = 78, footerH = 94, maxDim = 4096;
+    let scale = Math.min(115, 1900 / innerW, 1250 / innerH, (maxDim - 48) / innerW, (maxDim - headerH - footerH - 28) / innerH);
+    scale = Math.max(1, scale);
     const planW = innerW * scale, planH = innerH * scale;
     const outW = Math.max(860, Math.round(planW + 48));
-    const headerH = 78, footerH = 94;
     const outH = Math.round(planH + headerH + footerH + 28);
     const tx = (outW - planW) / 2;
     const ty = headerH + 10;
@@ -1608,18 +1857,21 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
     const world = svg('g', { transform:`translate(${tx + pad * scale - b.x0 * scale} ${ty + pad * scale - b.y0 * scale}) scale(${scale})` });
     const saved = { grid:state.showGrid, dims:state.showDims, selection:state.selection };
-    state.showGrid = true; state.showDims = true; state.selection = null;
-    const eb = { x0:b.x0 - pad, y0:b.y0 - pad, x1:b.x1 + pad, y1:b.y1 + pad };
-    world.appendChild(buildGrid(scale, eb, true));
-    for (const item of state.items) if (item.type === 'room') world.appendChild(buildRoom(item, scale));
-    for (const item of state.items) if (item.type === 'object') world.appendChild(buildObject(item, scale));
-    for (const item of state.items) if (item.type === 'wall') world.appendChild(buildWall(item, scale));
-    state.showDims = false;
-    for (const item of state.items) if (item.type === 'door' || item.type === 'window') {
-      const el = buildOpening(item, scale);
-      if (el) world.appendChild(el);
+    try {
+      state.showGrid = true; state.showDims = true; state.selection = null;
+      const eb = { x0:b.x0 - pad, y0:b.y0 - pad, x1:b.x1 + pad, y1:b.y1 + pad };
+      world.appendChild(buildGrid(scale, eb, true));
+      for (const item of state.items) if (item.type === 'room') world.appendChild(buildRoom(item, scale));
+      for (const item of state.items) if (item.type === 'object') world.appendChild(buildObject(item, scale));
+      for (const item of state.items) if (item.type === 'wall') world.appendChild(buildWall(item, scale));
+      state.showDims = false;
+      for (const item of state.items) if (item.type === 'door' || item.type === 'window') {
+        const el = buildOpening(item, scale);
+        if (el) world.appendChild(el);
+      }
+    } finally {
+      state.showGrid = saved.grid; state.showDims = saved.dims; state.selection = saved.selection;
     }
-    state.showGrid = saved.grid; state.showDims = saved.dims; state.selection = saved.selection;
     root.appendChild(world);
 
     const watermark = svg('text', {
@@ -1669,51 +1921,234 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   }
   function exportSvg(){
-    const doc = buildExportDocument();
-    downloadBlob(new Blob([doc.source], { type:'image/svg+xml;charset=utf-8' }), `network1ng-blueprint-${Date.now()}.svg`);
-    toast('SVG exported with title block');
+    try {
+      const doc = buildExportDocument();
+      downloadBlob(new Blob([doc.source], { type:'image/svg+xml;charset=utf-8' }), `network1ng-blueprint-${Date.now()}.svg`);
+      toast('SVG exported with title block');
+    } catch (_) {
+      toast('SVG export failed');
+    }
   }
   function exportPng(){
-    const doc = buildExportDocument();
-    const blob = new Blob([doc.source], { type:'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = doc.width; canvas.height = doc.height;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#04152a';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, doc.width, doc.height);
-      URL.revokeObjectURL(url);
-      canvas.toBlob(png => {
-        if (png) {
-          downloadBlob(png, `network1ng-blueprint-${Date.now()}.png`);
-          toast('PNG exported with title block');
+    let url = null;
+    try {
+      const doc = buildExportDocument();
+      const blob = new Blob([doc.source], { type:'image/svg+xml;charset=utf-8' });
+      url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = doc.width; canvas.height = doc.height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error('Canvas unavailable');
+          ctx.fillStyle = '#04152a';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, doc.width, doc.height);
+          canvas.toBlob(png => {
+            if (png) {
+              downloadBlob(png, `network1ng-blueprint-${Date.now()}.png`);
+              toast('PNG exported with title block');
+            } else toast('PNG export failed');
+          }, 'image/png');
+        } catch (_) {
+          toast('PNG export failed');
+        } finally {
+          if (url) { URL.revokeObjectURL(url); url = null; }
         }
-      }, 'image/png');
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); toast('PNG export failed'); };
-    img.src = url;
+      };
+      img.onerror = () => {
+        if (url) { URL.revokeObjectURL(url); url = null; }
+        toast('PNG export failed');
+      };
+      img.src = url;
+    } catch (_) {
+      if (url) URL.revokeObjectURL(url);
+      toast('PNG export failed');
+    }
+  }
+
+  /* persistence */
+  let saveTimer = null, lastSaveData = null, lastSavedAt = null;
+  function setSaveStatus(kind, text){
+    const el = $('#saveStatus');
+    if (!el) return;
+    el.classList.toggle('saving', kind === 'saving');
+    el.classList.toggle('error', kind === 'error');
+    el.textContent = text;
+  }
+  function savedTime(ms){
+    if (!Number.isFinite(ms)) return '';
+    try { return new Date(ms).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }); }
+    catch (_) { return ''; }
+  }
+  function savePlan(force = false){
+    let itemsData, payload;
+    try {
+      itemsData = JSON.stringify(state.items);
+      payload = JSON.stringify({ version:1, savedAt:Date.now(), items:state.items });
+    } catch (_) { setSaveStatus('error', 'Could not save on this device'); return false; }
+    if (!force && itemsData === lastSaveData) {
+      setSaveStatus('saved', lastSavedAt ? `Saved locally · ${savedTime(lastSavedAt)}` : 'Saved on this device');
+      return true;
+    }
+    try {
+      localStorage.setItem(SAVE_KEY, payload);
+      lastSaveData = itemsData;
+      lastSavedAt = Date.now();
+      setSaveStatus('saved', `Saved locally · ${savedTime(lastSavedAt)}`);
+      return true;
+    } catch (_) {
+      setSaveStatus('error', 'Could not save on this device');
+      return false;
+    }
+  }
+  function queueSave(){
+    setSaveStatus('saving', 'Saving locally…');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { saveTimer = null; savePlan(); }, 350);
+  }
+  function sanitizeItems(rawItems){
+    if (!Array.isArray(rawItems)) return null;
+    const types = new Set(['room','wall','object','door','window']);
+    const items = [], ids = new Set(), walls = new Map(), openings = [];
+    const finite = n => typeof n === 'number' && Number.isFinite(n);
+    const num = (n, fallback) => finite(n) ? n : fallback;
+    function takeId(type, rawId){
+      let id = typeof rawId === 'string' && rawId.trim() ? rawId.trim().slice(0, 100) : uid(type);
+      if (ids.has(id)) {
+        let n = 2;
+        while (ids.has(`${id}-${n}`)) n++;
+        id = `${id}-${n}`;
+      }
+      ids.add(id);
+      return id;
+    }
+    for (const raw of rawItems.slice(0, 1200)) {
+      if (!raw || typeof raw !== 'object' || !types.has(raw.type)) continue;
+      if (raw.type === 'wall') {
+        if (!finite(raw.x1) || !finite(raw.y1) || !finite(raw.x2) || !finite(raw.y2)) continue;
+        const x1 = round3(clamp(raw.x1, -10000, 10000)), y1 = round3(clamp(raw.y1, -10000, 10000));
+        const x2 = round3(clamp(raw.x2, -10000, 10000)), y2 = round3(clamp(raw.y2, -10000, 10000));
+        if (Math.hypot(x2 - x1, y2 - y1) < .1) continue;
+        const wall = {
+          id:takeId('wall', raw.id), type:'wall', x1, y1, x2, y2,
+          thickness:round3(clamp(num(raw.thickness, .18), .05, 1))
+        };
+        items.push(wall);
+        walls.set(wall.id, wall);
+      } else if (raw.type === 'room' || raw.type === 'object') {
+        if (!finite(raw.x) || !finite(raw.y) || !finite(raw.w) || !finite(raw.h)) continue;
+        const roomCount = items.filter(i => i.type === 'room').length;
+        const fallbackColor = raw.type === 'room' ? COLORS.rooms[roomCount % COLORS.rooms.length] : COLORS.object;
+        const color = typeof raw.color === 'string' && /^#[0-9a-f]{3,8}$/i.test(raw.color) ? raw.color : fallbackColor;
+        const item = {
+          id:takeId(raw.type, raw.id), type:raw.type,
+          x:round3(clamp(raw.x, -10000, 10000)), y:round3(clamp(raw.y, -10000, 10000)),
+          w:round3(clamp(raw.w, .2, 1000)), h:round3(clamp(raw.h, .2, 1000)),
+          rot:Math.round((((num(raw.rot, 0) % 360) + 360) % 360) * 10) / 10,
+          label:(typeof raw.label === 'string' ? raw.label.trim().slice(0, 80) : '') || (raw.type === 'room' ? 'ROOM' : 'OBJECT'),
+          color
+        };
+        if (raw.type === 'object') {
+          item.shape = raw.shape === 'circle' ? 'circle' : 'rect';
+          item.flipX = raw.flipX ? 1 : 0;
+          item.flipY = raw.flipY ? 1 : 0;
+        }
+        items.push(item);
+      } else if (raw.type === 'door' || raw.type === 'window') {
+        if (typeof raw.wallId !== 'string' || !finite(raw.t)) continue;
+        openings.push(raw);
+      }
+    }
+    for (const raw of openings) {
+      const wall = walls.get(raw.wallId);
+      if (!wall) continue;
+      const len = wallLength(wall);
+      if (len < .1) continue;
+      const maxWidth = Math.max(.02, len - .02);
+      const width = round3(clamp(num(raw.width, raw.type === 'door' ? .9 : 1.2), .02, maxWidth));
+      const frac = width / len;
+      const t = round3(clamp(num(raw.t, .5), frac / 2, 1 - frac / 2));
+      items.push({
+        id:takeId(raw.type, raw.id), type:raw.type, wallId:wall.id, t, width,
+        swing:raw.swing === -1 ? -1 : 1,
+        hinge:raw.hinge ? 1 : 0
+      });
+    }
+    return items;
+  }
+  function restorePlan(){
+    let raw;
+    try { raw = localStorage.getItem(SAVE_KEY); }
+    catch (_) { setSaveStatus('error', 'Local storage is unavailable'); return false; }
+    if (!raw) return false;
+    try {
+      const data = JSON.parse(raw);
+      const items = sanitizeItems(data && data.items);
+      if (!items) return false;
+      state.items = items;
+      state.selection = null;
+      state.history.length = 0;
+      state.future.length = 0;
+      state.wallDraft = null;
+      state.preview = null;
+      state.activeSnap = null;
+      lastSaveData = JSON.stringify(state.items);
+      lastSavedAt = Number.isFinite(data.savedAt) ? data.savedAt : null;
+      const time = savedTime(data.savedAt);
+      setSaveStatus('saved', time ? `Restored · last saved ${time}` : 'Restored from this device');
+      return true;
+    } catch (_) {
+      setSaveStatus('error', 'Saved plan could not be read');
+      return false;
+    }
   }
 
   /* modal & project actions */
+  let lastModalFocus = null;
   function openProjectModal(){
+    lastModalFocus = document.activeElement;
     updateMetrics();
+    savePlan();
     modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    setTimeout(() => {
+      const first = modal.querySelector('button:not([disabled]), [href], input:not([disabled]), select:not([disabled])');
+      if (first) first.focus();
+    }, 0);
   }
-  function closeProjectModal(){ modal.classList.remove('open'); }
+  function closeProjectModal(){
+    if (!modal.classList.contains('open')) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    if (lastModalFocus && lastModalFocus.isConnected) lastModalFocus.focus();
+    lastModalFocus = null;
+  }
+  function trapModalFocus(e){
+    const focusable = Array.from(modal.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')).filter(el => el.offsetParent !== null);
+    if (!focusable.length) { e.preventDefault(); return; }
+    const first = focusable[0], last = focusable[focusable.length - 1], active = document.activeElement;
+    if (e.shiftKey && (active === first || !modal.contains(active))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (active === last || !modal.contains(active))) { e.preventDefault(); first.focus(); }
+  }
   function loadDemo(){
+    if (state.items.length && !window.confirm('Replace the current plan with the demo?')) return;
     pushHistory();
     state.items = demoPlan();
     state.selection = null;
-    buildInspector(); fitPlan(); render(); updateHistoryButtons(); closeProjectModal(); toast('Demo plan loaded');
+    state.wallDraft = null;
+    state.tool = 'select'; syncToolButtons(); updateToolHint();
+    buildInspector(); fitPlan(); render(); updateHistoryButtons(); queueSave(); closeProjectModal(); toast('Demo plan loaded');
   }
   function newPlan(){
-    if (!window.confirm('Clear the plan and start fresh?')) return;
-    pushHistory();
-    state.items = []; state.selection = null;
-    buildInspector(); fitPlan(); render(); updateHistoryButtons(); closeProjectModal(); toast('New blank plan');
+    if (state.items.length) {
+      if (!window.confirm('Clear the plan and start fresh?')) return;
+      pushHistory();
+    }
+    state.items = []; state.selection = null; state.wallDraft = null;
+    state.tool = 'select'; syncToolButtons(); updateToolHint();
+    buildInspector(); fitPlan(); render(); updateHistoryButtons(); queueSave(); closeProjectModal(); toast('New blank plan');
   }
   $('#exportBtn').addEventListener('click', openProjectModal);
   $$('[data-close-modal]').forEach(el => el.addEventListener('click', closeProjectModal));
@@ -1740,7 +2175,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   });
   syncInstallButton();
   if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => toast('Offline cache unavailable')));
   }
 
   document.addEventListener('keydown', e => {
@@ -1748,6 +2183,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       if (modal.classList.contains('open')) { closeProjectModal(); return; }
       state.interaction = null; state.preview = null; state.activeSnap = null;
       state.selection = null; buildInspector(); render();
+      return;
+    }
+    if (modal.classList.contains('open')) {
+      if (e.key === 'Tab') trapModalFocus(e);
       return;
     }
     const tag = (e.target.tagName || '').toLowerCase();
@@ -1763,8 +2202,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     else if (key === 'd') setTool('door');
     else if (key === 'n') setTool('window');
     else if (key === 'h') setTool('hand');
-    else if (key === 'g') { state.showGrid = !state.showGrid; $('#gridBtn').classList.toggle('active', state.showGrid); render(); }
-    else if (key === 'm') { state.showDims = !state.showDims; $('#dimsBtn').classList.toggle('active', state.showDims); render(); }
+    else if (key === 'g') { state.showGrid = !state.showGrid; syncViewToggles(); render(); }
+    else if (key === 'm') { state.showDims = !state.showDims; syncViewToggles(); render(); }
     else if (key === 'f') fitPlan();
   });
 
@@ -1788,14 +2227,18 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     }
   }
 
-  state.items = [];
+  const restored = restorePlan();
   buildInspector();
   syncToolButtons();
+  syncViewToggles();
   updateToolHint();
   updateHistoryButtons();
   if ('ResizeObserver' in window) new ResizeObserver(resizeBoard).observe(canvasWrap);
   window.addEventListener('resize', resizeBoard);
+  window.addEventListener('pagehide', () => savePlan(true));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) savePlan(true); });
   resizeBoard();
+  if (restored) toast('Local plan restored');
 })();
 </script>
 </body>

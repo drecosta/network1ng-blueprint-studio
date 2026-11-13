@@ -15,9 +15,13 @@ Open the live site on your phone, then choose **Install app** in the Export pane
 - Pan, zoom, pinch, drag, resize, and rotate
 - Walls, rooms, doors, windows, and furniture objects
 - Exact wall length and thickness editing with Apply/Cancel
+- Rotation slider and quick-angle controls for rooms and objects
+- Horizontal and vertical object flipping
 - Grid, corner, edge, and alignment snapping
 - Live total floor area in square metres
+- Automatic local autosave with restore on reopen
 - Undo/redo and project presets
+- Collapsible mobile inspector that moves out of the way while dragging
 - Branded SVG and PNG exports
 - Installable PWA with offline support
 
