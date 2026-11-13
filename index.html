@@ -385,7 +385,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     tool:'select', showGrid:true, showDims:true, snap:true,
     view:{ scale:56, tx:0, ty:0 }, items:[], selection:null,
     preview:null, activeSnap:null, interaction:null, pointers:new Map(),
-    gestureLock:false, history:[], future:[], editSnapshot:null, wallDraft:null,
+    gestureLock:false, history:[], future:[], editSnapshot:null, wallDraft:null, wallRotSnapshot:null,
     initialized:false, renderFrame:0, shapeKind:'rect'
   };
   let W = 0, H = 0;
@@ -1390,7 +1390,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const prev = state.history.pop();
     state.items = clone(prev.items);
     state.selection = prev.selection && getItem(prev.selection) ? prev.selection : null;
-    state.preview = null; state.activeSnap = null; state.wallDraft = null;
+    state.preview = null; state.activeSnap = null; state.wallDraft = null; state.wallRotSnapshot = null;
     buildInspector(); render(); updateHistoryButtons(); queueSave(); toast('Undone');
   }
   function redo(){
@@ -1399,7 +1399,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const next = state.future.pop();
     state.items = clone(next.items);
     state.selection = next.selection && getItem(next.selection) ? next.selection : null;
-    state.preview = null; state.activeSnap = null; state.wallDraft = null;
+    state.preview = null; state.activeSnap = null; state.wallDraft = null; state.wallRotSnapshot = null;
     buildInspector(); render(); updateHistoryButtons(); queueSave(); toast('Redone');
   }
   function updateHistoryButtons(){
@@ -1452,6 +1452,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function applyWallDraft(){
     const item = getItem(state.selection), draft = wallDraftFor(item);
     if (!draft) return;
+    state.wallRotSnapshot = null;
     const v = draft.values;
     const links1 = endpointLinks(item.x1, item.y1, item.id), links2 = endpointLinks(item.x2, item.y2, item.id);
     let x1 = Number.isFinite(v.x1) ? v.x1 : item.x1, y1 = Number.isFinite(v.y1) ? v.y1 : item.y1;
@@ -1486,6 +1487,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function cancelWallDraft(){
     const item = getItem(state.selection);
     if (!item || item.type !== 'wall') return;
+    state.wallRotSnapshot = null;
     startWallDraft(item);
     buildInspector(); render(); toast('Wall changes discarded');
   }
@@ -1497,10 +1499,51 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <div class="rot-actions"><button class="mini-btn" data-action="rotate-step" data-step="-90">−90°</button><button class="mini-btn" data-action="rotate-step" data-step="-15">−15°</button><button class="mini-btn" data-action="rotate-step" data-step="15">+15°</button><button class="mini-btn" data-action="rotate-step" data-step="90">+90°</button></div>
     </div>`;
   }
+  function wallAngle(item){
+    const a = deg(Math.atan2(item.y2 - item.y1, item.x2 - item.x1));
+    return Math.round((((a % 360) + 360) % 360) * 10) / 10;
+  }
+  function wallRotationControls(item){
+    const angle = wallAngle(item), shown = Math.round(angle);
+    return `<div class="rot-controls">
+      <div class="rot-line"><span class="rot-caption">Rotate wall</span><input class="rot-slider" type="range" min="0" max="359" step="1" value="${shown}" data-wall-rot aria-label="Wall rotation angle"><output class="rot-value" data-wall-rot-value>${fmt(angle, 1)}°</output></div>
+      <div class="rot-actions"><button class="mini-btn" data-action="rotate-wall-step" data-step="-90">−90°</button><button class="mini-btn" data-action="rotate-wall-step" data-step="-15">−15°</button><button class="mini-btn" data-action="rotate-wall-step" data-step="15">+15°</button><button class="mini-btn" data-action="rotate-wall-step" data-step="90">+90°</button></div>
+    </div>`;
+  }
+  function rotateWallTo(item, targetAngle){
+    if (!item || item.type !== 'wall') return false;
+    const len = wallLength(item);
+    if (len < .1) return false;
+    const current = wallAngle(item);
+    const target = Math.round((((targetAngle % 360) + 360) % 360) * 10) / 10;
+    if (Math.abs(((target - current + 540) % 360) - 180) < .01) return false;
+    const center = getCenter(item), rad = target * Math.PI / 180;
+    const dx = Math.cos(rad) * len / 2, dy = Math.sin(rad) * len / 2;
+    const links1 = endpointLinks(item.x1, item.y1, item.id), links2 = endpointLinks(item.x2, item.y2, item.id);
+    item.x1 = round3(center.x - dx); item.y1 = round3(center.y - dy);
+    item.x2 = round3(center.x + dx); item.y2 = round3(center.y + dy);
+    setLinkedEndpoints(links1, item.x1, item.y1);
+    setLinkedEndpoints(links2, item.x2, item.y2);
+    normalizeOpeningsFor([item.id, ...links1.map(l => l.id), ...links2.map(l => l.id)]);
+    state.wallDraft = null;
+    startWallDraft(item);
+    return true;
+  }
+  function rotateWallBy(item, step){
+    if (!item || item.type !== 'wall' || !step) return;
+    const target = wallAngle(item) + step;
+    if (Math.abs(((target - wallAngle(item) + 540) % 360) - 180) < .01) return;
+    state.wallRotSnapshot = null;
+    pushHistory();
+    rotateWallTo(item, target);
+    buildInspector(); render(); updateHistoryButtons(); queueSave();
+    toast('Wall rotated');
+  }
   function buildInspector(){
     const item = getItem(state.selection);
     if (!item) {
       state.wallDraft = null;
+      state.wallRotSnapshot = null;
       inspector.dataset.itemId = '';
       inspector.classList.remove('sheet-collapsed');
       const area = totalArea(), rooms = state.items.filter(i => i.type === 'room').length, walls = state.items.filter(i => i.type === 'wall').length;
@@ -1541,6 +1584,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       body = `<div class="section-label" style="margin-top:0">Exact wall</div>
         ${field('Length', 'length', fmt(wallLength(item)), { unit:'m', step:.01, min:.1, full:true })}
         <div class="field-grid" style="margin-top:8px">${field('Thickness', 'thickness', fmt(item.thickness), { unit:'m', step:.01, min:.05, full:true })}</div>
+        ${wallRotationControls(item)}
+        <div class="note" style="margin-top:6px">Rotation applies immediately around the wall centre.</div>
         <div class="insp-actions" style="margin-top:10px"><button class="btn primary grow" data-action="wall-apply">Apply changes</button><button class="btn grow" data-action="wall-cancel">Cancel</button></div>
         <div class="section-label">Advanced placement</div>
         <div class="field-grid">${field('Start X', 'x1', fmt(item.x1), { unit:'m' })}${field('Start Y', 'y1', fmt(item.y1), { unit:'m' })}${field('End X', 'x2', fmt(item.x2), { unit:'m' })}${field('End Y', 'y2', fmt(item.y2), { unit:'m' })}</div>
@@ -1602,6 +1647,13 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         input.value = prop === 'rot' ? fmt(value, 1) : fmt(value, 2);
       }
     });
+    const wallRot = inspector.querySelector('[data-wall-rot]');
+    if (wallRot && item.type === 'wall') {
+      const angle = wallAngle(item);
+      if (force || document.activeElement !== wallRot) wallRot.value = String(Math.round(angle));
+      const wallRotValue = inspector.querySelector('[data-wall-rot-value]');
+      if (wallRotValue) wallRotValue.textContent = `${fmt(angle, 1)}°`;
+    }
     const rotValue = inspector.querySelector('[data-rot-value]');
     if (rotValue && (item.type === 'room' || item.type === 'object')) {
       rotValue.textContent = `${Math.round((((item.rot || 0) % 360) + 360) % 360)}°`;
@@ -1655,6 +1707,18 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (e.target.matches('[data-prop]') && !state.editSnapshot) state.editSnapshot = snapshot();
   });
   inspector.addEventListener('input', e => {
+    if (e.target.matches('[data-wall-rot]')) {
+      const item = getItem(state.selection), n = draftNumber(e.target.value);
+      if (!item || item.type !== 'wall' || n === null) return;
+      const hadSnapshot = !!state.wallRotSnapshot;
+      if (!hadSnapshot) state.wallRotSnapshot = snapshot();
+      const changed = rotateWallTo(item, n);
+      if (!changed && !hadSnapshot) state.wallRotSnapshot = null;
+      const out = inspector.querySelector('[data-wall-rot-value]');
+      if (out) out.textContent = `${fmt(wallAngle(item), 1)}°`;
+      scheduleRender();
+      return;
+    }
     if (wallDraftFor(getItem(state.selection))) { updateWallDraft(e.target); return; }
     const prop = e.target.getAttribute('data-prop');
     if (prop === 'rot' && e.target.type === 'range') {
@@ -1672,6 +1736,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     }
   });
   inspector.addEventListener('change', e => {
+    if (e.target.matches('[data-wall-rot]')) {
+      if (state.wallRotSnapshot) {
+        pushHistory(state.wallRotSnapshot);
+        state.wallRotSnapshot = null;
+        updateHistoryButtons();
+        queueSave();
+      }
+      return;
+    }
     const input = e.target.closest('[data-prop]');
     if (!input) return;
     if (wallDraftFor(getItem(state.selection))) {
@@ -1709,6 +1782,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     else if (action === 'delete') deleteSelection();
     else if (action === 'duplicate') duplicateSelection();
     else if (action === 'rotate-step' && item) rotateSelection(parseFloat(btn.getAttribute('data-step')) || 0);
+    else if (action === 'rotate-wall-step' && item && item.type === 'wall') rotateWallBy(item, parseFloat(btn.getAttribute('data-step')) || 0);
     else if (action === 'flip-object' && item && item.type === 'object') flipObject(item, btn.getAttribute('data-axis'));
     else if (action === 'flip' && item) { pushHistory(); item.swing *= -1; render(); queueSave(); }
     else if (action === 'hinge' && item && item.type === 'door') { pushHistory(); item.hinge = item.hinge ? 0 : 1; render(); queueSave(); toast('Door hinge reversed'); }
@@ -1812,7 +1886,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   }
   function setTool(tool){
     state.tool = tool === 'hand' || tool === 'pan' ? 'move' : tool;
-    state.preview = null; state.activeSnap = null;
+    state.preview = null; state.activeSnap = null; state.wallRotSnapshot = null;
     if (state.tool !== 'select') state.selection = null;
     buildInspector();
     syncToolButtons(); updateToolHint(); render();
