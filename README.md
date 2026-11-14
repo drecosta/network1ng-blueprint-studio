@@ -22,7 +22,7 @@ Open the live site on your phone, then choose **Install app** in the Export pane
 - Live total floor area in square metres
 - Automatic local autosave with restore on reopen
 - Undo/redo and project presets
-- Collapsible mobile inspector that moves out of the way while dragging
+- Scrollable mobile inspector with collapse button and swipe-down dismissal
 - Branded SVG and PNG exports
 - Installable PWA with offline support
 
