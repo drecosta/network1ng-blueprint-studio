@@ -152,7 +152,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:18px}
 .modal.open{display:flex}
 .modal-backdrop{position:absolute;inset:0;background:rgba(1,8,17,.82)}
-.modal-card{position:relative;width:min(430px,100%);max-height:88dvh;overflow-y:auto;border-radius:20px;border:1px solid rgba(103,232,255,.26);background:linear-gradient(170deg,#0a2b4b,#05182e 72%);box-shadow:0 30px 100px rgba(0,0,0,.62);padding:18px;animation:modalIn .22s cubic-bezier(.2,.8,.2,1)}
+.modal-card{position:relative;width:min(430px,100%);max-height:88dvh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border-radius:20px;border:1px solid rgba(103,232,255,.26);background:linear-gradient(170deg,#0a2b4b,#05182e 72%);box-shadow:0 30px 100px rgba(0,0,0,.62);padding:18px;animation:modalIn .22s cubic-bezier(.2,.8,.2,1)}
 @keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 .modal-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:15px}
 .modal-head .brand-mark{width:42px;height:42px;flex-basis:42px;font-size:15px}
@@ -168,8 +168,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .save-status.saving::before{background:var(--cyan);box-shadow:0 0 8px rgba(103,232,255,.65)}
 .save-status.error{color:#ffb3b3}.save-status.error::before{background:var(--red,#ff6b6b);box-shadow:none}
 .export-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.export-option{border:1px solid var(--line);border-radius:13px;padding:13px 12px;background:rgba(3,16,31,.35);color:var(--white);text-align:left;transition:.15s;display:flex;flex-direction:column;gap:7px}
+.export-option{border:1px solid var(--line);border-radius:13px;padding:13px 12px;background:rgba(3,16,31,.35);color:var(--white);text-align:left;transition:.15s;display:flex;flex-direction:column;gap:7px;touch-action:manipulation}
 .export-option:hover{border-color:rgba(103,232,255,.42);background:rgba(103,232,255,.07);transform:translateY(-1px)}
+@media(hover:none){.export-option:hover{transform:none;background:rgba(103,232,255,.04)}}
 .export-option svg{width:22px;height:22px;color:var(--cyan)}.export-option b{font-size:11px}.export-option span{font-size:8.5px;color:var(--muted);line-height:1.4}
 .modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:15px;padding-top:13px;border-top:1px solid var(--line)}
 .modal-actions .row{display:flex;gap:8px}
@@ -236,7 +237,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   .brand-title{font-size:10.5px;letter-spacing:.07em}.brand-sub{font-size:6.5px;letter-spacing:.12em}
   .area-chip{padding:5px 8px;gap:5px;border-radius:10px}.area-chip .label{display:none}.area-chip strong{font-size:12px}.area-chip small{font-size:7.5px}
   .icon-btn{height:36px;min-width:36px;border-radius:9px}.icon-btn svg{width:17px;height:17px}
-  .export-btn{width:36px;min-width:36px;padding:0;border-radius:9px}.export-btn span{display:none}
+  .export-btn{width:36px;min-width:36px;padding:0;border-radius:9px;justify-content:center}.export-btn span{display:none}
   .canvas-controls{left:8px;top:8px;padding:3px;gap:1px;border-radius:12px}.canvas-btn{width:36px;height:36px;border-radius:9px}.canvas-sep{margin:0 1px;height:18px}
   .canvas-hint{bottom:10px;left:50%;max-width:calc(100% - 156px);font-size:8px;padding:5px 9px;white-space:nowrap}
   .scale-readout{left:10px;bottom:10px;font-size:7.5px;gap:5px}.canvas-watermark{right:10px;bottom:9px}.canvas-watermark b{font-size:6.5px}.canvas-watermark span{display:none}
@@ -447,7 +448,66 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function getCenter(item){ return item.type === 'wall' ? { x:(item.x1 + item.x2) / 2, y:(item.y1 + item.y2) / 2 } : { x:item.x + item.w / 2, y:item.y + item.h / 2 }; }
   function wallLength(w){ return Math.hypot(w.x2 - w.x1, w.y2 - w.y1); }
   function roomArea(r){ return Math.max(0, r.w * r.h); }
-  function totalArea(){ return state.items.reduce((a, i) => i.type === 'room' ? a + roomArea(i) : a, 0); }
+  function segmentInsideRanges(a, b, poly){
+    let lo = 0, hi = 1;
+    const eps = 1e-7;
+    for (let i = 0; i < poly.length; i++) {
+      const u = poly[i], v = poly[(i + 1) % poly.length];
+      const ex = v.x - u.x, ey = v.y - u.y;
+      const f0 = ex * (a.y - u.y) - ey * (a.x - u.x);
+      const f1 = ex * (b.y - u.y) - ey * (b.x - u.x);
+      if (f0 < -eps && f1 < -eps) return [];
+      if (f0 >= -eps && f1 >= -eps) continue;
+      const t = f0 / (f0 - f1);
+      if (f0 < -eps) lo = Math.max(lo, t); else hi = Math.min(hi, t);
+    }
+    return lo < hi ? [[lo, hi]] : [];
+  }
+  function totalArea(){
+    const rooms = state.items.filter(i => i.type === 'room');
+    const key = rooms.map(r => `${r.id}:${r.x},${r.y},${r.w},${r.h},${r.rot || 0}`).join('|');
+    if (state.areaKey === key) return state.areaValue;
+    let area = 0;
+    if (rooms.length === 1) area = roomArea(rooms[0]);
+    else if (rooms.length) {
+      let sum = 0;
+      for (const room of rooms) {
+        const poly = rotatedCorners(room), n = poly.length;
+        for (let j = 0; j < n; j++) {
+          const a = poly[j], b = poly[(j + 1) % n];
+          let ranges = [[0, 1]];
+          for (const other of rooms) {
+            if (other === room) continue;
+            const inside = segmentInsideRanges(a, b, rotatedCorners(other));
+            if (!inside.length) continue;
+            const next = [];
+            for (const [s, e] of ranges) {
+              let cursor = s;
+              for (const [is, ie] of inside) {
+                if (ie <= cursor || is >= e) continue;
+                if (is > cursor) next.push([cursor, Math.min(is, e)]);
+                cursor = Math.max(cursor, ie);
+                if (cursor >= e) break;
+              }
+              if (cursor < e) next.push([cursor, e]);
+            }
+            ranges = next;
+            if (!ranges.length) break;
+          }
+          const dx = b.x - a.x, dy = b.y - a.y;
+          for (const [s, e] of ranges) {
+            const x0 = a.x + dx * s, y0 = a.y + dy * s;
+            const x1 = a.x + dx * e, y1 = a.y + dy * e;
+            sum += x0 * y1 - x1 * y0;
+          }
+        }
+      }
+      area = Math.max(0, sum / 2);
+    }
+    state.areaKey = key;
+    state.areaValue = area;
+    return area;
+  }
   function rotatedPoint(px, py, cx, cy, rotation){
     const a = rad(rotation || 0), c = Math.cos(a), s = Math.sin(a), dx = px - cx, dy = py - cy;
     return { x:cx + dx * c - dy * s, y:cy + dx * s + dy * c };
@@ -1480,6 +1540,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function applyWallDraft(){
     const item = getItem(state.selection), draft = wallDraftFor(item);
     if (!draft) return;
+    const rotSnap = state.wallRotSnapshot;
     state.wallRotSnapshot = null;
     const v = draft.values;
     const links1 = endpointLinks(item.x1, item.y1, item.id), links2 = endpointLinks(item.x2, item.y2, item.id);
@@ -1501,7 +1562,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const thickness = clamp(Number.isFinite(v.thickness) ? v.thickness : item.thickness, .05, 1);
     const changed = Math.abs(item.x1 - x1) > .0005 || Math.abs(item.y1 - y1) > .0005 ||
       Math.abs(item.x2 - x2) > .0005 || Math.abs(item.y2 - y2) > .0005 || Math.abs(item.thickness - thickness) > .0005;
-    if (!changed) { startWallDraft(item); buildInspector(); render(); toast('No wall changes to apply'); return; }
+    if (!changed) {
+      if (rotSnap) { pushHistory(rotSnap); queueSave(); }
+      startWallDraft(item); buildInspector(); render(); toast('No wall changes to apply'); return;
+    }
+    if (rotSnap) pushHistory(rotSnap);
     pushHistory();
     item.x1 = round3(x1); item.y1 = round3(y1);
     item.x2 = round3(x2); item.y2 = round3(y2);
@@ -1515,8 +1580,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function cancelWallDraft(){
     const item = getItem(state.selection);
     if (!item || item.type !== 'wall') return;
+    const rotSnap = state.wallRotSnapshot;
     state.wallRotSnapshot = null;
-    startWallDraft(item);
+    if (rotSnap) {
+      state.items = clone(rotSnap.items);
+      state.selection = rotSnap.selection && getItem(rotSnap.selection) ? rotSnap.selection : state.selection;
+      queueSave();
+    }
+    const restored = getItem(state.selection);
+    if (restored && restored.type === 'wall') startWallDraft(restored);
+    else state.wallDraft = null;
     buildInspector(); render(); toast('Wall changes discarded');
   }
 
@@ -1754,6 +1827,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (prop === 'rot' && e.target.type === 'range') {
       const item = getItem(state.selection), n = draftNumber(e.target.value);
       if (!item || n === null) return;
+      if (!state.editSnapshot) state.editSnapshot = snapshot();
       item.rot = Math.round((((n % 360) + 360) % 360) * 10) / 10;
       const out = inspector.querySelector('[data-rot-value]');
       if (out) out.textContent = `${Math.round(item.rot)}°`;
@@ -1806,7 +1880,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (action === 'wall-apply') applyWallDraft();
     else if (action === 'wall-cancel') cancelWallDraft();
     else if (action === 'toggle-inspector') toggleInspector();
-    else if (action === 'close-inspector') { state.selection = null; buildInspector(); render(); }
+    else if (action === 'close-inspector') {
+      if (state.wallRotSnapshot) { pushHistory(state.wallRotSnapshot); state.wallRotSnapshot = null; queueSave(); }
+      state.selection = null; buildInspector(); render();
+    }
     else if (action === 'fit') fitPlan();
     else if (action === 'open-export') openProjectModal();
     else if (action === 'delete') deleteSelection();
@@ -1890,7 +1967,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     }
     state.items.push(copy);
     state.selection = copy.id;
-    buildInspector(); render(); toast('Duplicated');
+    buildInspector(); render(); queueSave(); toast('Duplicated');
   }
 
   /* UI state */
@@ -1947,6 +2024,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     emptyState.setAttribute('aria-hidden', show ? 'false' : 'true');
   }
   function setTool(tool){
+    if (state.wallRotSnapshot) { pushHistory(state.wallRotSnapshot); state.wallRotSnapshot = null; queueSave(); }
     state.tool = tool === 'hand' || tool === 'pan' ? 'move' : tool;
     state.preview = null; state.activeSnap = null; state.wallRotSnapshot = null;
     if (state.tool !== 'select') state.selection = null;
@@ -1998,7 +2076,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const innerW = Math.max(2, b.w + pad * 2), innerH = Math.max(2, b.h + pad * 2);
     const headerH = 78, footerH = 94, maxDim = 4096;
     let scale = Math.min(115, 1900 / innerW, 1250 / innerH, (maxDim - 48) / innerW, (maxDim - headerH - footerH - 28) / innerH);
-    scale = Math.max(1, scale);
+    scale = Math.max(.05, scale);
     const planW = innerW * scale, planH = innerH * scale;
     const outW = Math.max(860, Math.round(planW + 48));
     const outH = Math.round(planH + headerH + footerH + 28);
