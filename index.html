@@ -968,8 +968,28 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     state.interaction = { kind:'pinchView', startDist:Math.max(8, Math.hypot(b.x - a.x, b.y - a.y)), startView:{ ...state.view }, worldAtMid:toWorld(mid) };
   }
 
+  function pointOverInspector(e){
+    if (!inspector.classList.contains('open')) return false;
+    const r = inspector.getBoundingClientRect();
+    return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  }
+
+  function cancelCanvasInteraction(){
+    if (!state.pointers.size && !state.interaction) return;
+    const it = state.interaction;
+    for (const id of Array.from(state.pointers.keys())) {
+      try { board.releasePointerCapture(id); } catch (_) {}
+    }
+    state.pointers.clear();
+    state.interaction = null; state.preview = null; state.activeSnap = null; state.gestureLock = false;
+    board.classList.remove('panning');
+    if (it && it.changed) queueSave();
+    scheduleRender();
+  }
+
   function onPointerDown(e){
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (pointOverInspector(e)) { cancelCanvasInteraction(); return; }
     e.preventDefault();
     try { board.setPointerCapture(e.pointerId); } catch (_) {}
     const p = screenPoint(e), world = toWorld(p);
@@ -1183,7 +1203,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function onPointerUp(e){
     const had = state.pointers.has(e.pointerId);
     state.pointers.delete(e.pointerId);
-    if (!had) return;
+    if (!had) { try { board.releasePointerCapture(e.pointerId); } catch (_) {} return; }
     try { board.releasePointerCapture(e.pointerId); } catch (_) {}
     board.classList.remove('panning');
     const it = state.interaction;
@@ -1249,6 +1269,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
   function onPointerCancel(e){
     state.pointers.delete(e.pointerId);
+    try { board.releasePointerCapture(e.pointerId); } catch (_) {}
     if (state.pointers.size === 0) {
       const it = state.interaction;
       if (it && (it.kind === 'resizeWall' || it.kind === 'moveWall')) {
@@ -1799,6 +1820,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
   let inspectorGrab = null;
   inspector.addEventListener('pointerdown', e => {
+    cancelCanvasInteraction();
     const handle = e.target.closest('[data-insp-grab]');
     if (!handle || !isCompactSheet() || !inspector.classList.contains('open')) return;
     inspectorGrab = { id:e.pointerId, y:e.clientY, dy:0 };
@@ -1823,6 +1845,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   }
   inspector.addEventListener('pointerup', endInspectorGrab);
   inspector.addEventListener('pointercancel', endInspectorGrab);
+  inspector.addEventListener('wheel', e => {
+    const input = e.target.closest && e.target.closest('input[type="number"]');
+    if (input && document.activeElement === input) input.blur();
+  }, { passive:true });
 
   function rotateSelection(step){
     const item = getItem(state.selection);
