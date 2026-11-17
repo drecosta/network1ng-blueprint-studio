@@ -1010,24 +1010,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
     if (state.tool === 'move') {
       if (state.multiSelect) {
-        if (itemEl) {
-          const id = itemEl.getAttribute('data-id'), item = getItem(id);
-          if (!item || (item.type !== 'room' && item.type !== 'object')) {
-            state.interaction = { kind:'marquee', start:world, startScreen:p, moved:false };
-            state.preview = { kind:'marquee', start:world, end:world };
-            render();
-            return;
-          }
-          const wasSelected = state.multiIds.includes(id);
-          if (!wasSelected) {
-            state.multiIds.push(id);
-            state.selection = id;
-          }
-          state.interaction = createGroupMove(state.multiIds, world, wasSelected);
+        const id = itemEl ? itemEl.getAttribute('data-id') : null;
+        const item = id ? getItem(id) : null;
+        if (item && state.multiIds.includes(id)) {
+          state.interaction = createGroupMove(state.multiIds, world, true);
+          state.interaction.tappedId = id;
           render();
           return;
         }
-        state.interaction = { kind:'marquee', start:world, startScreen:p, moved:false };
+        state.interaction = { kind:'multiDrag', start:world, startScreen:p, moved:false, pendingId:id || null };
         state.preview = { kind:'marquee', start:world, end:world };
         render();
         return;
@@ -1213,6 +1204,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       return;
     }
 
+    if (it.kind === 'multiDrag') {
+      const dx = p.x - it.startScreen.x, dy = p.y - it.startScreen.y;
+      if (Math.hypot(dx, dy) > 6) { it.kind = 'marquee'; it.moved = true; }
+      else return;
+    }
+
     if (it.kind === 'marquee') {
       const dx = p.x - it.startScreen.x, dy = p.y - it.startScreen.y;
       if (Math.hypot(dx, dy) > 3) it.moved = true;
@@ -1362,13 +1359,31 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (!it) { state.preview = null; state.activeSnap = null; scheduleRender(); return; }
 
     if (it.kind === 'groupMove') {
-      if (!it.moved && it.wasSelected) {
-        state.multiIds = state.multiIds.filter(id => id !== it.ids[0]);
+      if (!it.moved && it.wasSelected && it.tappedId) {
+        state.multiIds = state.multiIds.filter(id => id !== it.tappedId);
         state.selection = state.multiIds[0] || null;
       }
       state.interaction = null; state.preview = null; state.activeSnap = null;
       render();
       if (it.moved) queueSave();
+      return;
+    }
+
+    if (it.kind === 'multiDrag') {
+      if (!it.moved) {
+        const id = it.pendingId, item = id ? getItem(id) : null;
+        if (item && (item.type === 'room' || item.type === 'object')) {
+          const idx = state.multiIds.indexOf(id);
+          if (idx >= 0) state.multiIds.splice(idx, 1);
+          else state.multiIds.push(id);
+          state.selection = state.multiIds[0] || null;
+        } else {
+          state.multiIds = [];
+          state.selection = null;
+        }
+      }
+      state.interaction = null; state.preview = null; state.activeSnap = null;
+      render();
       return;
     }
 
