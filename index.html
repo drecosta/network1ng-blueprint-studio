@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#061a30">
 <meta name="description" content="Mobile-first metric floor-plan editor with precise walls, rooms, openings, and vector export.">
 <meta name="mobile-web-app-capable" content="yes">
@@ -286,6 +286,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 3l8 4.4v9.2L12 21l-8-4.4V7.4L12 3z" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/><path d="M12 21V11.8M4 7.4l8 4.4 8-4.4" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></symbol>
 <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 6M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3z" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 18h14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V6M8 10l4-4 4 4M5 18h14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M7 9.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs></svg>
 
@@ -358,6 +360,14 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <button class="export-option" id="exportPng"><svg><use href="#i-image"/></svg><b>PNG image</b><span>High-resolution raster with title block &amp; watermark.</span></button>
       <button class="export-option" id="exportSvg"><svg><use href="#i-vector"/></svg><b>SVG vector</b><span>Scalable blueprint view for print or editing.</span></button>
       <button class="export-option" id="exportGlb"><svg><use href="#i-cube"/></svg><b>3D model</b><span>GLB mesh template for Blender / 3D modelling.</span></button>
+    </div>
+    <div class="section-label">Project backup</div>
+    <div class="modal-actions" style="margin-top:8px;padding-top:0;border-top:0">
+      <div class="row">
+        <button class="btn grow" id="backupJson"><svg><use href="#i-download"/></svg>Backup .json</button>
+        <button class="btn grow" id="restoreJson"><svg><use href="#i-upload"/></svg>Restore .json</button>
+      </div>
+      <input type="file" id="restoreJsonInput" accept=".json,application/json" hidden>
     </div>
     <div class="modal-actions"><div class="row"><button class="btn grow" id="loadDemoBtn"><svg><use href="#i-spark"/></svg>Load demo</button><button class="btn grow danger" id="newPlanBtn"><svg><use href="#i-refresh"/></svg>New plan</button></div><button class="btn install-btn" id="installBtn" hidden><svg><use href="#i-install"/></svg><span id="installBtnLabel">Install app</span></button></div>
     <div class="brand-footer">Crafted for precise spaces · <b>Made by NetworK1NG</b></div>
@@ -455,6 +465,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function getItem(id){ return state.items.find(i => i.id === id) || null; }
   function getCenter(item){ return item.type === 'wall' ? { x:(item.x1 + item.x2) / 2, y:(item.y1 + item.y2) / 2 } : { x:item.x + item.w / 2, y:item.y + item.h / 2 }; }
   function wallLength(w){ return Math.hypot(w.x2 - w.x1, w.y2 - w.y1); }
+  function openingFit(type, wall, requestedWidth, requestedT){
+    const len = wallLength(wall);
+    const maxW = Math.max(.02, len - .02);
+    const width = round3(clamp(requestedWidth == null ? (type === 'door' ? .9 : 1.2) : requestedWidth, .02, maxW));
+    const margin = width + .04 <= len ? .02 / len : 0;
+    const half = width / 2 / len;
+    const t = round3(clamp(requestedT == null ? .5 : requestedT, half + margin, 1 - half - margin));
+    return { width, t };
+  }
   function roomArea(r){ return Math.max(0, r.w * r.h); }
   function segmentInsideRanges(a, b, poly){
     let lo = 0, hi = 1;
@@ -1084,9 +1103,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (state.tool === 'door' || state.tool === 'window') {
       const near = getNearestWall(world, 30 / state.view.scale);
       if (!near) { toast('Tap closer to a wall'); return; }
-      const len = wallLength(near.wall), width = state.tool === 'door' ? .9 : 1.2;
-      const t = clamp(near.t, (width / 2 + .02) / len, 1 - (width / 2 + .02) / len);
-      const op = { id:uid(state.tool), type:state.tool, wallId:near.wall.id, t, width:Math.min(width, len * .8), swing:1 };
+      const fit = openingFit(state.tool, near.wall);
+      const op = { id:uid(state.tool), type:state.tool, wallId:near.wall.id, t:fit.t, width:fit.width, swing:1 };
       state.interaction = { kind:'placeOpening', op };
       state.preview = { kind:'opening', op };
       state.activeSnap = { x:near.x, y:near.y, type:'edge', guides:[] };
@@ -1213,9 +1231,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (it.kind === 'placeOpening') {
       const near = getNearestWall(world, 30 / state.view.scale);
       if (near) {
-        const len = wallLength(near.wall), width = it.op.width;
+        const sameWall = near.wall.id === it.op.wallId;
+        const fit = openingFit(it.op.type, near.wall, sameWall ? it.op.width : undefined, near.t);
         it.op.wallId = near.wall.id;
-        it.op.t = clamp(near.t, (width / 2 + .02) / len, 1 - (width / 2 + .02) / len);
+        it.op.width = fit.width;
+        it.op.t = fit.t;
         state.preview = { kind:'opening', op:it.op };
         state.activeSnap = { x:near.x, y:near.y, type:'edge', guides:[] };
         scheduleRender();
@@ -1385,7 +1405,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       let startP, endP;
       if (it.handle === 'o-start') { startP = Math.min(param, it.fixedParam - .2); endP = it.fixedParam; }
       else { startP = it.fixedParam; endP = Math.max(param, it.fixedParam + .2); }
-      const width = round3(clamp(endP - startP, .2, geo.len - .05));
+      const minW = Math.min(.2, Math.max(.02, geo.len - .05));
+      const width = round3(clamp(endP - startP, minW, Math.max(.02, geo.len - .05)));
       const t = round3(clamp((startP + endP) / 2 / geo.len, width / 2 / geo.len, 1 - width / 2 / geo.len));
       if (op.width === width && op.t === t) return;
       beginChange(it);
@@ -1532,6 +1553,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   board.addEventListener('pointerup', onPointerUp);
   board.addEventListener('pointercancel', onPointerCancel);
   board.addEventListener('contextmenu', e => e.preventDefault());
+  board.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive:false });
+  board.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive:false });
+  ['gesturestart','gesturechange','gestureend'].forEach(type => board.addEventListener(type, e => e.preventDefault(), { passive:false }));
   board.addEventListener('wheel', e => {
     e.preventDefault();
     zoomAt(screenPoint(e), Math.exp(-e.deltaY * .0014));
@@ -2509,15 +2533,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     };
     const n = ring.length;
     for (let i = 1; i < n - 1; i++) {
-      addFace([[ring[0].x, y0, ring[0].y], [ring[i + 1].x, y0, ring[i + 1].y], [ring[i].x, y0, ring[i].y]], [0, -1, 0]);
-      addFace([[ring[0].x, y1, ring[0].y], [ring[i].x, y1, ring[i].y], [ring[i + 1].x, y1, ring[i + 1].y]], [0, 1, 0]);
+      addFace([[ring[0].x, y0, ring[0].y], [ring[i].x, y0, ring[i].y], [ring[i + 1].x, y0, ring[i + 1].y]], [0, -1, 0]);
+      addFace([[ring[0].x, y1, ring[0].y], [ring[i + 1].x, y1, ring[i + 1].y], [ring[i].x, y1, ring[i].y]], [0, 1, 0]);
     }
     for (let i = 0; i < n; i++) {
       const a = ring[i], b = ring[(i + 1) % n];
       let nx = b.y - a.y, nz = -(b.x - a.x);
       const len = Math.hypot(nx, nz) || 1;
       nx /= len; nz /= len;
-      addFace([[a.x, y0, a.y], [b.x, y0, b.y], [b.x, y1, b.y], [a.x, y1, a.y]], [nx, 0, nz]);
+      addFace([[a.x, y0, a.y], [a.x, y1, a.y], [b.x, y1, b.y], [b.x, y0, b.y]], [nx, 0, nz]);
     }
     target.positions.push(new Float32Array(positions));
     target.normals.push(new Float32Array(normals));
@@ -2686,6 +2710,38 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (!Number.isFinite(ms)) return '';
     try { return new Date(ms).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }); }
     catch (_) { return ''; }
+  }
+  function exportJson(){
+    try {
+      const payload = { app:'network1ng-blueprint-studio', version:2, savedAt:Date.now(), items:state.items };
+      downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' }), `network1ng-blueprint-${new Date().toISOString().slice(0,10)}.json`);
+      toast('Project backup exported');
+    } catch (_) {
+      toast('Backup export failed');
+    }
+  }
+  function importJson(file){
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result || ''));
+        const items = sanitizeItems(data && data.items);
+        if (!items) { toast('Invalid project file'); return; }
+        if (state.items.length && !window.confirm('Replace the current plan with this backup?')) return;
+        pushHistory();
+        state.items = items;
+        state.selection = null; state.multiIds = []; state.multiSelect = false;
+        state.wallDraft = null; state.wallRotSnapshot = null;
+        state.tool = 'select'; syncToolButtons(); updateToolHint();
+        buildInspector(); fitPlan(); render(); updateHistoryButtons();
+        queueSave(); closeProjectModal(); toast('Project restored from backup');
+      } catch (_) {
+        toast('Invalid project file');
+      }
+    };
+    reader.onerror = () => toast('Could not read file');
+    reader.readAsText(file);
   }
   function savePlan(force = false){
     let itemsData, payload;
@@ -2860,6 +2916,13 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   $('#exportPng').addEventListener('click', exportPng);
   $('#exportSvg').addEventListener('click', exportSvg);
   $('#exportGlb').addEventListener('click', exportGlb);
+  $('#backupJson').addEventListener('click', exportJson);
+  $('#restoreJson').addEventListener('click', () => $('#restoreJsonInput').click());
+  $('#restoreJsonInput').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    importJson(file);
+  });
   $('#loadDemoBtn').addEventListener('click', loadDemo);
   $('#newPlanBtn').addEventListener('click', newPlan);
 
