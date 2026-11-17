@@ -171,7 +171,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .save-status::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green,#74f0b0);box-shadow:0 0 8px rgba(116,240,176,.55)}
 .save-status.saving::before{background:var(--cyan);box-shadow:0 0 8px rgba(103,232,255,.65)}
 .save-status.error{color:#ffb3b3}.save-status.error::before{background:var(--red,#ff6b6b);box-shadow:none}
-.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.export-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}
 .export-option{border:1px solid var(--line);border-radius:13px;padding:13px 12px;background:rgba(3,16,31,.35);color:var(--white);text-align:left;transition:.15s;display:flex;flex-direction:column;gap:7px;touch-action:manipulation}
 .export-option:hover{border-color:rgba(103,232,255,.42);background:rgba(103,232,255,.07);transform:translateY(-1px)}
 @media(hover:none){.export-option:hover{transform:none;background:rgba(103,232,255,.04)}}
@@ -199,9 +199,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .open-ink{stroke:#7eeaff;fill:none;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .open-arc{stroke:rgba(126,234,255,.64);fill:none;stroke-width:1.15;vector-effect:non-scaling-stroke;stroke-dasharray:3 3;pointer-events:none}
 .open-hit{stroke:transparent;fill:none;pointer-events:stroke;cursor:pointer}
-.measure-pill{fill:rgba(3,17,32,.88);stroke:rgba(103,232,255,.24);stroke-width:1;vector-effect:non-scaling-stroke}
-.measure-text{fill:#a9eafa;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle;letter-spacing:.03em}
-.measure-text.strong{fill:#e4fbff}
+.measure-pill{fill:rgba(3,17,32,.94);stroke:rgba(103,232,255,.42);stroke-width:1;vector-effect:non-scaling-stroke}
+.measure-text{fill:#e6fbff;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle;letter-spacing:.03em}
+.measure-text.strong{fill:#ffffff}
 .selection-box{fill:none;stroke:#67e8ff;stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-dasharray:5 4;opacity:.9;pointer-events:none}
 .selection-handle{fill:#072138;stroke:#67e8ff;stroke-width:1.8;vector-effect:non-scaling-stroke;pointer-events:none}
 .handle-hit{fill:transparent;stroke:none;pointer-events:all;cursor:pointer}
@@ -283,6 +283,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8.5" cy="9" r="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4 18l5-5 3 3 2-2 5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-vector" viewBox="0 0 24 24"><path d="M5 19L19 5M5 5h14v14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="5" cy="19" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="19" cy="5" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+<symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 3l8 4.4v9.2L12 21l-8-4.4V7.4L12 3z" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/><path d="M12 21V11.8M4 7.4l8 4.4 8-4.4" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></symbol>
 <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 6M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3z" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></symbol>
 <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M7 9.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -356,6 +357,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <div class="export-grid">
       <button class="export-option" id="exportPng"><svg><use href="#i-image"/></svg><b>PNG image</b><span>High-resolution raster with title block &amp; watermark.</span></button>
       <button class="export-option" id="exportSvg"><svg><use href="#i-vector"/></svg><b>SVG vector</b><span>Scalable blueprint view for print or editing.</span></button>
+      <button class="export-option" id="exportGlb"><svg><use href="#i-cube"/></svg><b>3D model</b><span>GLB mesh template for Blender / 3D modelling.</span></button>
     </div>
     <div class="modal-actions"><div class="row"><button class="btn grow" id="loadDemoBtn"><svg><use href="#i-spark"/></svg>Load demo</button><button class="btn grow danger" id="newPlanBtn"><svg><use href="#i-refresh"/></svg>New plan</button></div><button class="btn install-btn" id="installBtn" hidden><svg><use href="#i-install"/></svg><span id="installBtnLabel">Install app</span></button></div>
     <div class="brand-footer">Crafted for precise spaces · <b>Made by NetworK1NG</b></div>
@@ -1823,6 +1825,49 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     buildInspector(); render(); updateHistoryButtons(); queueSave();
     toast('Wall rotated');
   }
+
+  function openingControls(item){
+    const geo = openingGeometry(item);
+    if (!geo) return '';
+    const len = geo.len, frac = item.width / len;
+    const minT = frac / 2 * 100, maxT = (1 - frac / 2) * 100;
+    const pos = clamp(item.t * 100, minT, maxT);
+    const wMin = .2, wMax = Math.max(.2, len - .02), width = clamp(item.width, wMin, wMax);
+    return `<div class="rot-controls">
+      <div class="rot-line"><span class="rot-caption">Along wall</span><input class="rot-slider" type="range" min="${fmt(minT, 2)}" max="${fmt(maxT, 2)}" step="0.5" value="${fmt(pos, 2)}" data-prop="tPct" aria-label="Position along wall"><output class="rot-value" data-open-pos-value>${fmt(pos, 1)}%</output></div>
+      <div class="rot-actions"><button class="mini-btn" data-action="opening-move" data-step="-0.25">−25 cm</button><button class="mini-btn" data-action="opening-move" data-step="-0.05">−5 cm</button><button class="mini-btn" data-action="opening-move" data-step="0.05">+5 cm</button><button class="mini-btn" data-action="opening-move" data-step="0.25">+25 cm</button></div>
+      <div class="rot-line"><span class="rot-caption">Width</span><input class="rot-slider" type="range" min="${fmt(wMin, 2)}" max="${fmt(wMax, 2)}" step="0.05" value="${fmt(width, 2)}" data-prop="width" aria-label="Opening width"><output class="rot-value" data-open-width-value>${fmt(width, 2)} m</output></div>
+      <div class="rot-actions"><button class="mini-btn" data-action="opening-resize" data-step="-0.25">−25 cm</button><button class="mini-btn" data-action="opening-resize" data-step="-0.05">−5 cm</button><button class="mini-btn" data-action="opening-resize" data-step="0.05">+5 cm</button><button class="mini-btn" data-action="opening-resize" data-step="0.25">+25 cm</button></div>
+    </div>`;
+  }
+
+  function nudgeOpening(kind, step){
+    const item = getItem(state.selection);
+    if (!item || (item.type !== 'door' && item.type !== 'window') || !step) return;
+    const geo = openingGeometry(item);
+    if (!geo) return;
+    pushHistory();
+    if (kind === 'move') {
+      const frac = item.width / geo.len;
+      item.t = round3(clamp(item.t + step / geo.len, frac / 2, 1 - frac / 2));
+    } else {
+      item.width = round3(clamp(item.width + step, .02, Math.max(.02, geo.len - .02)));
+      const frac = item.width / geo.len;
+      item.t = round3(clamp(item.t, frac / 2, 1 - frac / 2));
+    }
+    render(); syncInspectorValues(true); queueSave();
+  }
+  function centerOpening(){
+    const item = getItem(state.selection);
+    if (!item || (item.type !== 'door' && item.type !== 'window')) return;
+    const geo = openingGeometry(item);
+    if (!geo) return;
+    pushHistory();
+    const frac = item.width / geo.len;
+    item.t = round3(clamp(.5, frac / 2, 1 - frac / 2));
+    render(); syncInspectorValues(true); queueSave();
+    toast('Opening centered');
+  }
   function buildInspector(){
     const item = getItem(state.selection);
     if (!item) {
@@ -1879,7 +1924,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     } else {
       const isDoor = item.type === 'door';
       head = `<div class="insp-kicker">${isDoor ? 'Openings / Door' : 'Openings / Window'}</div><h2 class="insp-title">${isDoor ? 'Door' : 'Window'}</h2><div class="insp-sub">Magnetic wall snap · live width</div>`;
-      body = `<div class="field-grid">${field('Width', 'width', fmt(item.width), { unit:'m', step:.05, min:.2 })}${field('Wall position', 'tPct', fmt(item.t * 100, 1), { unit:'%', step:.5, min:0 })}</div>${isDoor ? `<div class="insp-actions"><button class="btn grow" data-action="flip"><svg><use href="#i-refresh"/></svg>Swing side</button><button class="btn grow" data-action="hinge"><svg><use href="#i-door"/></svg>Reverse hinge</button></div>` : ''}<div class="note">Drag the element along its host wall to reposition it. Drag either end handle to resize the opening.</div>`;
+      body = `<div class="field-grid">${field('Width', 'width', fmt(item.width), { unit:'m', step:.05, min:.2 })}${field('Wall position', 'tPct', fmt(item.t * 100, 1), { unit:'%', step:.5, min:0 })}</div>${openingControls(item)}<div class="rot-actions"><button class="mini-btn" data-action="opening-center">Center on wall</button></div>${isDoor ? `<div class="insp-actions"><button class="btn grow" data-action="flip"><svg><use href="#i-refresh"/></svg>Swing side</button><button class="btn grow" data-action="hinge"><svg><use href="#i-door"/></svg>Reverse hinge</button></div>` : ''}<div class="note">Use the slider or arrows to slide the opening along its wall. Exact values are above.</div>`;
       actions = `<button class="btn grow" data-action="duplicate"><svg><use href="#i-copy"/></svg>Duplicate</button><button class="btn grow danger" data-action="delete"><svg><use href="#i-trash"/></svg>Delete</button>`;
     }
     inspector.innerHTML = `
@@ -2017,6 +2062,29 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       scheduleRender();
       return;
     }
+    if ((prop === 'tPct' || prop === 'width') && e.target.type === 'range') {
+      const item = getItem(state.selection), n = draftNumber(e.target.value);
+      if (!item || (item.type !== 'door' && item.type !== 'window') || n === null) return;
+      if (!state.editSnapshot) state.editSnapshot = snapshot();
+      if (prop === 'tPct') {
+        const geo = openingGeometry(item);
+        if (!geo) return;
+        const frac = item.width / geo.len;
+        item.t = round3(clamp(n / 100, frac / 2, 1 - frac / 2));
+        const out = inspector.querySelector('[data-open-pos-value]');
+        if (out) out.textContent = `${fmt(item.t * 100, 1)}%`;
+      } else {
+        const geo = openingGeometry(item);
+        if (!geo) return;
+        item.width = round3(clamp(n, .02, Math.max(.02, geo.len - .02)));
+        const frac = item.width / geo.len;
+        item.t = round3(clamp(item.t, frac / 2, 1 - frac / 2));
+        const out = inspector.querySelector('[data-open-width-value]');
+        if (out) out.textContent = `${fmt(item.width, 2)} m`;
+      }
+      scheduleRender(); queueSave();
+      return;
+    }
     if (prop === 'label') {
       const item = getItem(state.selection);
       if (item) { item.label = e.target.value.slice(0, 80); scheduleRender(); queueSave(); }
@@ -2073,6 +2141,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     else if (action === 'duplicate') duplicateSelection();
     else if (action === 'rotate-step' && item) rotateSelection(parseFloat(btn.getAttribute('data-step')) || 0);
     else if (action === 'rotate-wall-step' && item && item.type === 'wall') rotateWallBy(item, parseFloat(btn.getAttribute('data-step')) || 0);
+    else if (action === 'opening-move' && item && (item.type === 'door' || item.type === 'window')) nudgeOpening('move', parseFloat(btn.getAttribute('data-step')) || 0);
+    else if (action === 'opening-resize' && item && (item.type === 'door' || item.type === 'window')) nudgeOpening('resize', parseFloat(btn.getAttribute('data-step')) || 0);
+    else if (action === 'opening-center' && item && (item.type === 'door' || item.type === 'window')) centerOpening();
     else if (action === 'flip-object' && item && item.type === 'object') flipObject(item, btn.getAttribute('data-axis'));
     else if (action === 'flip' && item) { pushHistory(); item.swing *= -1; render(); queueSave(); }
     else if (action === 'hinge' && item && item.type === 'door') { pushHistory(); item.hinge = item.hinge ? 0 : 1; render(); queueSave(); toast('Door hinge reversed'); }
@@ -2278,7 +2349,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     .object-label{fill:#a8eafa;font-family:ui-sans-serif,sans-serif;font-weight:600;text-anchor:middle;dominant-baseline:middle;letter-spacing:.08em}
     .open-gap{fill:none;stroke:#061a30;stroke-linecap:butt}.open-ink{stroke:#7eeaff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
     .open-arc{stroke:rgba(126,234,255,.64);fill:none;stroke-width:1.15;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
-    .measure-pill{fill:rgba(3,17,32,.9);stroke:rgba(103,232,255,.24);stroke-width:1;vector-effect:non-scaling-stroke}
+    .measure-pill{fill:rgba(3,17,32,.94);stroke:rgba(103,232,255,.42);stroke-width:1;vector-effect:non-scaling-stroke}
     .measure-text{fill:#a9eafa;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle;letter-spacing:.03em}
     .measure-text.strong{fill:#e4fbff}
   `;
@@ -2417,6 +2488,188 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     } catch (_) {
       if (url) URL.revokeObjectURL(url);
       toast('PNG export failed');
+    }
+  }
+
+  /* GLB export — clean Y-up metric mesh template */
+  function glbPrism(target, pts, y0, y1, name, material){
+    if (!pts || pts.length < 3 || y1 <= y0) return;
+    let area = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length];
+      area += a.x * b.y - b.x * a.y;
+    }
+    const ring = area < 0 ? pts.slice().reverse() : pts.slice();
+    const positions = [], normals = [], indices = [];
+    const addFace = (verts, n) => {
+      const base = positions.length / 3;
+      for (const v of verts) { positions.push(v[0], v[1], v[2]); normals.push(n[0], n[1], n[2]); }
+      if (verts.length === 3) indices.push(base, base + 1, base + 2);
+      else indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+    };
+    const n = ring.length;
+    for (let i = 1; i < n - 1; i++) {
+      addFace([[ring[0].x, y0, ring[0].y], [ring[i + 1].x, y0, ring[i + 1].y], [ring[i].x, y0, ring[i].y]], [0, -1, 0]);
+      addFace([[ring[0].x, y1, ring[0].y], [ring[i].x, y1, ring[i].y], [ring[i + 1].x, y1, ring[i + 1].y]], [0, 1, 0]);
+    }
+    for (let i = 0; i < n; i++) {
+      const a = ring[i], b = ring[(i + 1) % n];
+      let nx = b.y - a.y, nz = -(b.x - a.x);
+      const len = Math.hypot(nx, nz) || 1;
+      nx /= len; nz /= len;
+      addFace([[a.x, y0, a.y], [b.x, y0, b.y], [b.x, y1, b.y], [a.x, y1, a.y]], [nx, 0, nz]);
+    }
+    target.positions.push(new Float32Array(positions));
+    target.normals.push(new Float32Array(normals));
+    target.indices.push(new Uint32Array(indices));
+    target.names.push(name);
+    target.materials.push(material);
+  }
+  function glbRect(target, center, dir, width, depth, y0, y1, name, material){
+    const len = Math.hypot(dir.x, dir.y) || 1;
+    const ux = dir.x / len, uy = dir.y / len, nx = -uy, ny = ux;
+    const hw = Math.max(.005, width / 2), hd = Math.max(.005, depth / 2);
+    glbPrism(target, [
+      { x:center.x - ux * hw - nx * hd, y:center.y - uy * hw - ny * hd },
+      { x:center.x + ux * hw - nx * hd, y:center.y + uy * hw - ny * hd },
+      { x:center.x + ux * hw + nx * hd, y:center.y + uy * hw + ny * hd },
+      { x:center.x - ux * hw + nx * hd, y:center.y - uy * hw + ny * hd }
+    ], y0, y1, name, material);
+  }
+  function glbPlan(items, meta = {}){
+    const W = meta.wallHeight ?? 2.7, F = Math.max(.04, meta.floorThickness ?? .12);
+    const acc = { positions:[], normals:[], indices:[], names:[], materials:[] };
+    for (const item of items) {
+      if (item.type === 'room') {
+        glbPrism(acc, rotatedCorners(item), 0, F, `${item.label || 'Room'} Floor`, 0);
+      } else if (item.type === 'wall') {
+        const dx = item.x2 - item.x1, dy = item.y2 - item.y1, len = Math.hypot(dx, dy);
+        if (len < .05) continue;
+        const ux = dx / len, uy = dy / len, thickness = Math.max(.05, item.thickness || .18);
+        const gaps = [];
+        for (const op of items) {
+          if (op.type !== 'door' && op.type !== 'window' || op.wallId !== item.id) continue;
+          const geo = openingGeometry(op);
+          if (!geo) continue;
+          gaps.push({ s:Math.max(0, geo.gapStart), e:Math.min(len, geo.gapEnd) });
+        }
+        gaps.sort((a, b) => a.s - b.s);
+        let cursor = 0;
+        for (const gap of gaps) {
+          if (gap.s - cursor > .02) {
+            const mid = (cursor + gap.s) / 2;
+            glbRect(acc, { x:item.x1 + ux * mid, y:item.y1 + uy * mid }, { x:ux, y:uy }, gap.s - cursor, thickness, 0, W, `${item.label || 'Wall'} Segment`, 1);
+          }
+          cursor = Math.max(cursor, gap.e);
+        }
+        if (len - cursor > .02) {
+          const mid = (cursor + len) / 2;
+          glbRect(acc, { x:item.x1 + ux * mid, y:item.y1 + uy * mid }, { x:ux, y:uy }, len - cursor, thickness, 0, W, `${item.label || 'Wall'} Segment`, 1);
+        }
+      } else if (item.type === 'door' || item.type === 'window') {
+        const geo = openingGeometry(item);
+        if (!geo) continue;
+        const width = Math.max(.04, Math.min(item.width, geo.len * .98));
+        if (item.type === 'door') {
+          glbRect(acc, { x:geo.cx, y:geo.cy }, { x:geo.ux, y:geo.uy }, width, .05, 0, .04, 'Door Marker', 2);
+        } else {
+          glbRect(acc, { x:geo.cx, y:geo.cy }, { x:geo.ux, y:geo.uy }, width, .06, .9, 2.1, 'Window Glass', 3);
+          glbRect(acc, { x:geo.cx, y:geo.cy }, { x:geo.ux, y:geo.uy }, width + .06, Math.max(.09, geo.wall.thickness * .55), .82, 2.18, 'Window Frame', 4);
+        }
+      } else if (item.type === 'object') {
+        glbPrism(acc, rotatedCorners(item), 0, .76, `${item.label || 'Object'} Block`, 5);
+      }
+    }
+    return acc;
+  }
+  function buildGlb(items, meta = {}){
+    const acc = glbPlan(items, meta);
+    if (!acc.positions.length) throw new Error('No 3D geometry to export');
+    const chunks = [];
+    let byteLength = 0;
+    const pushChunk = (u8, pad = 0) => {
+      const gap = (4 - (byteLength % 4)) % 4;
+      if (gap) { chunks.push(new Uint8Array(gap)); byteLength += gap; }
+      chunks.push(u8); byteLength += u8.length;
+    };
+    const views = [];
+    for (let i = 0; i < acc.positions.length; i++) {
+      const p = new Uint8Array(acc.positions[i].buffer), n = new Uint8Array(acc.normals[i].buffer), ix = new Uint8Array(acc.indices[i].buffer);
+      const pOff = byteLength; pushChunk(p); views.push({ buffer:0, byteOffset:pOff, byteLength:p.length, target:34962 });
+      const nOff = byteLength; pushChunk(n); views.push({ buffer:0, byteOffset:nOff, byteLength:n.length, target:34962 });
+      const iOff = byteLength; pushChunk(ix); views.push({ buffer:0, byteOffset:iOff, byteLength:ix.length, target:34963 });
+    }
+    const padEnd = (4 - (byteLength % 4)) % 4;
+    if (padEnd) { chunks.push(new Uint8Array(padEnd)); byteLength += padEnd; }
+    const bin = new Uint8Array(byteLength);
+    let off = 0;
+    for (const chunk of chunks) { bin.set(chunk, off); off += chunk.length; }
+
+    const json = {
+      asset:{ version:'2.0', generator:'NetworK1NG Blueprint Studio' },
+      scene:0, scenes:[{ nodes:[0], name:'NetworK1NG Blueprint' }],
+      nodes:[{ name:'Floor Plan', mesh:0 }],
+      meshes:[{ name:'BlueprintMesh', primitives:acc.names.map((name, i) => ({
+        attributes:{ POSITION:0, NORMAL:0 }, indices:0, material:acc.materials[i], mode:4, name
+      })) }],
+      accessors:[], bufferViews:views,
+      buffers:[{ byteLength }],
+      materials:[
+        { name:'Room Floor', doubleSided:true, pbrMetallicRoughness:{ baseColorFactor:[.16,.62,.72,1], metallicFactor:.05, roughnessFactor:.85 } },
+        { name:'Wall', doubleSided:true, pbrMetallicRoughness:{ baseColorFactor:[.92,.95,.98,1], metallicFactor:.02, roughnessFactor:.9 } },
+        { name:'Door Marker', doubleSided:true, pbrMetallicRoughness:{ baseColorFactor:[.75,.35,.15,1], metallicFactor:.05, roughnessFactor:.6 } },
+        { name:'Window Glass', doubleSided:true, pbrMetallicRoughness:{ baseColorFactor:[.45,.82,.95,.35], metallicFactor:.1, roughnessFactor:.15 }, alphaMode:'BLEND' },
+        { name:'Window Frame', doubleSided:true, pbrMetallicRoughness:{ baseColorFactor:[.75,.78,.82,1], metallicFactor:.25, roughnessFactor:.4 } },
+        { name:'Object Block', doubleSided:true, pbrMetallicRoughness:{ baseColorFactor:[.65,.85,.95,1], metallicFactor:.05, roughnessFactor:.8 } }
+      ]
+    };
+    for (let i = 0; i < acc.positions.length; i++) {
+      const positions = acc.positions[i], normals = acc.normals[i], indices = acc.indices[i];
+      const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
+      for (let v = 0; v < positions.length; v += 3) {
+        for (let k = 0; k < 3; k++) {
+          const value = positions[v + k];
+          if (value < min[k]) min[k] = value;
+          if (value > max[k]) max[k] = value;
+        }
+      }
+      json.accessors.push({ bufferView:i * 3, componentType:5126, count:positions.length / 3, type:'VEC3', min, max });
+      json.accessors.push({ bufferView:i * 3 + 1, componentType:5126, count:normals.length / 3, type:'VEC3' });
+      json.accessors.push({ bufferView:i * 3 + 2, componentType:5125, count:indices.length, type:'SCALAR', min:[0], max:[Math.max(...indices)] });
+    }
+    acc.names.forEach((name, i) => {
+      json.meshes[0].primitives[i].attributes.POSITION = i * 3;
+      json.meshes[0].primitives[i].attributes.NORMAL = i * 3 + 1;
+      json.meshes[0].primitives[i].indices = i * 3 + 2;
+    });
+    const jsonText = JSON.stringify(json);
+    const jsonPad = (4 - (jsonText.length % 4)) % 4;
+    const jsonU8 = new Uint8Array(jsonText.length + jsonPad);
+    for (let i = 0; i < jsonText.length; i++) jsonU8[i] = jsonText.charCodeAt(i) & 0xff;
+    jsonU8.fill(32, jsonText.length);
+    const binChunkPad = (4 - (bin.length % 4)) % 4;
+    const binU8 = new Uint8Array(bin.length + binChunkPad);
+    binU8.set(bin);
+    const header = new DataView(new ArrayBuffer(12));
+    header.setUint32(0, 0x46546c67, true); header.setUint32(4, 2, true);
+    header.setUint32(8, 12 + 8 + jsonU8.length + 8 + binU8.length, true);
+    const jsonHeader = new DataView(new ArrayBuffer(8));
+    jsonHeader.setUint32(0, jsonU8.length, true); jsonHeader.setUint32(4, 0x4e4f534a, true);
+    const binHeader = new DataView(new ArrayBuffer(8));
+    binHeader.setUint32(0, binU8.length, true); binHeader.setUint32(4, 0x004e4942, true);
+    const parts = [new Uint8Array(header.buffer), new Uint8Array(jsonHeader.buffer), jsonU8, new Uint8Array(binHeader.buffer), binU8];
+    const out = new Uint8Array(header.getUint32(8, true));
+    let cursor = 0;
+    for (const part of parts) { out.set(part, cursor); cursor += part.length; }
+    return out.buffer;
+  }
+  function exportGlb(){
+    try {
+      const blob = new Blob([buildGlb(state.items)], { type:'model/gltf-binary' });
+      downloadBlob(blob, `network1ng-blueprint-3d-${Date.now()}.glb`);
+      toast('GLB 3D template exported');
+    } catch (_) {
+      toast('GLB export failed');
     }
   }
 
@@ -2606,6 +2859,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   $$('[data-close-modal]').forEach(el => el.addEventListener('click', closeProjectModal));
   $('#exportPng').addEventListener('click', exportPng);
   $('#exportSvg').addEventListener('click', exportSvg);
+  $('#exportGlb').addEventListener('click', exportGlb);
   $('#loadDemoBtn').addEventListener('click', loadDemo);
   $('#newPlanBtn').addEventListener('click', newPlan);
 
