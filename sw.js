@@ -1,4 +1,4 @@
-const CACHE = 'n1-blueprint-v10';
+const CACHE = 'n1-blueprint-v11';
 const BASE = self.registration.scope;
 const asset = path => new URL(path, BASE).href;
 const CORE = ['', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'].map(asset);

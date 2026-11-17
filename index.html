@@ -67,7 +67,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .canvas-btn:hover{color:var(--cyan);background:rgba(103,232,255,.07)}
 .canvas-btn.active{color:var(--cyan);background:rgba(103,232,255,.11);border-color:rgba(103,232,255,.18)}
 .canvas-btn[aria-pressed="true"]{color:var(--cyan);background:rgba(103,232,255,.14);border-color:rgba(103,232,255,.34)}
-.multi-box{fill:none;stroke:rgba(103,232,255,.55);stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:4 3;pointer-events:none}
+.multi-box{fill:rgba(103,232,255,.075);stroke:rgba(103,232,255,.62);stroke-width:1.4;vector-effect:non-scaling-stroke;stroke-dasharray:5 3;pointer-events:none}
+.multi-line{stroke:rgba(103,232,255,.62);stroke-width:2.6;vector-effect:non-scaling-stroke;stroke-dasharray:5 3;stroke-linecap:round;pointer-events:none}
 .marquee-box{fill:rgba(103,232,255,.07);stroke:#67e8ff;stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-dasharray:6 4;pointer-events:none}
 .canvas-btn svg{width:17px;height:17px}
 .canvas-sep{width:1px;height:21px;background:var(--line);margin:0 2px}
@@ -797,10 +798,14 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         inner.appendChild(svg('rect', { x:item.x, y:item.y, width:item.w, height:item.h, class:'multi-box' }));
         g.appendChild(inner);
       } else if (item.type === 'wall') {
+        g.appendChild(svg('line', { x1:item.x1, y1:item.y1, x2:item.x2, y2:item.y2, class:'multi-line' }));
         g.appendChild(svg('rect', { x:Math.min(item.x1, item.x2), y:Math.min(item.y1, item.y2), width:Math.abs(item.x2 - item.x1), height:Math.abs(item.y2 - item.y1), class:'multi-box' }));
       } else {
         const geo = openingGeometry(item);
-        if (geo) g.appendChild(svg('rect', { x:Math.min(geo.a.x, geo.b.x), y:Math.min(geo.a.y, geo.b.y), width:Math.abs(geo.b.x - geo.a.x), height:Math.abs(geo.b.y - geo.a.y), class:'multi-box' }));
+        if (geo) {
+          g.appendChild(svg('line', { x1:geo.a.x, y1:geo.a.y, x2:geo.b.x, y2:geo.b.y, class:'multi-line' }));
+          g.appendChild(svg('rect', { x:Math.min(geo.a.x, geo.b.x), y:Math.min(geo.a.y, geo.b.y), width:Math.abs(geo.b.x - geo.a.x), height:Math.abs(geo.b.y - geo.a.y), class:'multi-box' }));
+        }
       }
     }
     return g;
@@ -2264,13 +2269,14 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     .grid-label{fill:rgba(130,202,226,.65);font-family:ui-monospace,monospace;letter-spacing:.04em}
     .wall-glow{stroke:rgba(75,218,249,.13);fill:none;stroke-linecap:square}
     .wall-core{stroke:#e6fbff;fill:none;stroke-linecap:square}
-    .room-stroke{fill:none;stroke-width:1.2;opacity:.52;vector-effect:non-scaling-stroke}
+    .room-stroke{fill:none;stroke-width:1.2;opacity:.62;vector-effect:non-scaling-stroke}
+    .room-floor{opacity:.16}
     .room-label{fill:#dcf9ff;font-family:ui-sans-serif,sans-serif;font-weight:700;text-anchor:middle;dominant-baseline:middle;letter-spacing:.09em}
     .room-area{fill:#66dff8;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle}
     .object-stroke{fill:none;stroke:#75e0f5;stroke-width:1.4;opacity:.75;vector-effect:non-scaling-stroke}
     .object-orient{stroke:#9cecff;stroke-width:1;vector-effect:non-scaling-stroke;opacity:.42}
     .object-label{fill:#a8eafa;font-family:ui-sans-serif,sans-serif;font-weight:600;text-anchor:middle;dominant-baseline:middle;letter-spacing:.08em}
-    .open-gap{fill:none;stroke-linecap:butt}.open-ink{stroke:#7eeaff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+    .open-gap{fill:none;stroke:#061a30;stroke-linecap:butt}.open-ink{stroke:#7eeaff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
     .open-arc{stroke:rgba(126,234,255,.64);fill:none;stroke-width:1.15;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
     .measure-pill{fill:rgba(3,17,32,.9);stroke:rgba(103,232,255,.24);stroke-width:1;vector-effect:non-scaling-stroke}
     .measure-text{fill:#a9eafa;font-family:ui-monospace,monospace;text-anchor:middle;dominant-baseline:middle;letter-spacing:.03em}
@@ -2288,7 +2294,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     const outH = Math.round(planH + headerH + footerH + 28);
     const tx = (outW - planW) / 2;
     const ty = headerH + 10;
-    const root = svg('svg', { xmlns:NS, width:outW, height:outH, viewBox:`0 0 ${outW} ${outH}` });
+    const root = svg('svg', { width:outW, height:outH, viewBox:`0 0 ${outW} ${outH}` });
     const defs = svg('defs');
     const grad = svg('radialGradient', { id:'exportBg', cx:'30%', cy:'15%', r:'90%' });
     grad.appendChild(svg('stop', { offset:'0%', 'stop-color':'#0a2d4e' }));
