@@ -2402,7 +2402,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         if (rule.names.every(n => names.includes(n))) {
           for (const decl of rule.decls) {
             const c = decl.indexOf(':');
-            if (c > 0) el.style.setProperty(decl.slice(0, c).trim(), decl.slice(c + 1).trim());
+            if (c > 0) {
+              const prop = decl.slice(0, c).trim(), val = decl.slice(c + 1).trim();
+              el.style.setProperty(prop, val);
+              if (!el.hasAttribute(prop)) el.setAttribute(prop, val);
+            }
           }
         }
       }
@@ -2511,11 +2515,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     }
   }
   function exportPng(){
-    let url = null;
     try {
       const doc = buildExportDocument();
-      const blob = new Blob([doc.source], { type:'image/svg+xml;charset=utf-8' });
-      url = URL.createObjectURL(blob);
+      const svgStr = doc.source.replace(/^<\?xml[^>]*\?>\s*/, '');
+      const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
       const img = new Image();
       img.onload = () => {
         try {
@@ -2534,17 +2537,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
           }, 'image/png');
         } catch (_) {
           toast('PNG export failed');
-        } finally {
-          if (url) { URL.revokeObjectURL(url); url = null; }
         }
       };
-      img.onerror = () => {
-        if (url) { URL.revokeObjectURL(url); url = null; }
-        toast('PNG export failed');
-      };
+      img.onerror = () => { toast('PNG export failed'); };
       img.src = url;
     } catch (_) {
-      if (url) URL.revokeObjectURL(url);
       toast('PNG export failed');
     }
   }
