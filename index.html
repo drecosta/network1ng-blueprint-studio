@@ -2378,6 +2378,39 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     .measure-text.strong{fill:#e4fbff}
   `;
 
+  const EXPORT_RULES = (() => {
+    const rules = [];
+    for (const chunk of EXPORT_CSS.split('}')) {
+      const brace = chunk.indexOf('{');
+      if (brace < 0) continue;
+      const sel = chunk.slice(0, brace).trim();
+      if (!sel) continue;
+      const decls = chunk.slice(brace + 1).split(';').map(d => d.trim()).filter(Boolean);
+      for (const s of sel.split(',')) {
+        const names = s.trim().split('.').filter(Boolean);
+        if (names.length) rules.push({ names, decls });
+      }
+    }
+    return rules;
+  })();
+  function inlineExportStyles(root){
+    const apply = el => {
+      const cls = el.getAttribute && el.getAttribute('class');
+      if (!cls) return;
+      const names = cls.split(/\s+/);
+      for (const rule of EXPORT_RULES) {
+        if (rule.names.every(n => names.includes(n))) {
+          for (const decl of rule.decls) {
+            const c = decl.indexOf(':');
+            if (c > 0) el.style.setProperty(decl.slice(0, c).trim(), decl.slice(c + 1).trim());
+          }
+        }
+      }
+    };
+    apply(root);
+    const all = root.querySelectorAll('*');
+    for (const el of all) apply(el);
+  }
   function buildExportDocument(){
     const b = getContentBounds(), pad = 1;
     const innerW = Math.max(2, b.w + pad * 2), innerH = Math.max(2, b.h + pad * 2);
@@ -2455,6 +2488,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     addText(root, `${fmtShort(sbW / scale)} m`, outW - 250 + sbW / 2, footerY + 54, { fill:'#a9eafa', 'font-family':'ui-monospace,monospace', 'font-size':'8', 'text-anchor':'middle' });
     addText(root, 'MADE BY NETWORK1NG', outW - 26, footerY + 51, { fill:'#67e8ff', 'font-family':'ui-sans-serif,sans-serif', 'font-size':'10', 'font-weight':'700', 'text-anchor':'end', 'letter-spacing':'2' });
     addText(root, 'PRECISION SPACE PLANNING / N1', outW - 26, footerY + 65, { fill:'#527b93', 'font-family':'ui-monospace,monospace', 'font-size':'7', 'text-anchor':'end', 'letter-spacing':'1.4' });
+    inlineExportStyles(root);
     return { source:'<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(root), width:outW, height:outH, scale };
   }
 
